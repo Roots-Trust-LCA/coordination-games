@@ -246,6 +246,24 @@
     </div>
 
     <div class="param-group">
+      <h3>Reward Mechanics</h3>
+      <div style="margin-bottom:8px; font-size:12px; color:var(--muted);">How COIN is distributed to winners per game.</div>
+      <div class="toggle-group" style="margin-bottom:8px;">
+        <button class="toggle-btn active" id="rm-fixed"        onclick="setRewardModel('fixed')">Fixed</button>
+        <button class="toggle-btn"        id="rm-proportional" onclick="setRewardModel('proportional')">Prop.</button>
+        <button class="toggle-btn"        id="rm-tiered"       onclick="setRewardModel('tiered')">Tiered</button>
+      </div>
+      <div style="font-size:11px; color:var(--muted); line-height:1.5;" id="rm-desc">
+        Top winners receive a fixed COIN amount. All others receive nothing.
+      </div>
+      <div class="param-row" style="margin-top:8px;">
+        <label>Winners (%)</label>
+        <input type="number" id="p-winners" value="33" min="1" max="100" step="1">
+        <span class="unit">%</span>
+      </div>
+    </div>
+
+    <div class="param-group">
       <h3>Derived</h3>
       <div class="derived-box" id="derived-box">
         <!-- updated by JS -->
@@ -262,6 +280,7 @@
       <div class="tab" onclick="showTab('sensitivity')">Sensitivity</div>
       <div class="tab" onclick="showTab('usecases')">Use Cases</div>
       <div class="tab" onclick="showTab('questions')">Open Questions</div>
+      <div class="tab" onclick="showTab('rewards')">Reward Mechanics</div>
     </div>
 
     <!-- SUMMARY TAB -->
@@ -324,6 +343,11 @@
       <p style="color:var(--muted); margin-bottom:20px; font-size:13px;">Outstanding questions for EF call and model design. Answers will change model outputs significantly.</p>
       <div id="questions-content"></div>
     </div>
+
+    <!-- REWARDS TAB -->
+    <div class="panel" id="tab-rewards">
+      <div id="rewards-content"></div>
+    </div>
   </div>
 </div>
 
@@ -355,7 +379,7 @@ const JUMP_BALLS = [
 const OPEN_QUESTIONS = [
   { q: 'Token name', detail: 'COIN is a placeholder. Final name TBD — being discussed with EF.', impact: 'High (brand, legal)' },
   { q: 'Fee structure', detail: 'Platform fee on entry only (1× buy-in), or per-game (3× revenue)? Re-upping COIN between games, or entry-only? This is the single biggest variable in platform revenue.', impact: 'High (3× revenue delta)' },
-  { q: 'Reward mechanics', detail: 'How do games redistribute COIN to winners? Fixed payout / proportional to score / tiered? Affects agent strategy and game design.', impact: 'Medium' },
+  { q: 'Reward mechanics', detail: 'How do games redistribute COIN to winners? Fixed / proportional / tiered — now modeled in the Reward Mechanics tab. Toggle the mechanic and winner % to see payout curves and break-even thresholds.', impact: 'Medium' },
   { q: 'Prediction market dynamics', detail: 'External markets interacting with prize pool. Could attract external capital beyond buy-ins. Currently unmodeled — significant upside if activated.', impact: 'High (unmodeled upside)' },
   { q: 'COIN supply allocation', detail: '500K COIN from buy-ins at 1,000 agents (12.5% of supply). Where does the remaining 3.5M go — all prize pool, or some reserved for team/ecosystem?', impact: 'Medium' },
   { q: 'NFT prizes', detail: 'Auction-priced, fixed, or scarce-supply collectibles? Ongoing royalties from secondary market? 10 NFTs noted — value TBD.', impact: 'Medium' },
@@ -367,16 +391,19 @@ const OPEN_QUESTIONS = [
 // ============================================================
 let feeStructure = 'entry';
 let currentMilestone = 0;
+let rewardModel = 'fixed';
 
 function getParams() {
   return {
-    agents:   +document.getElementById('p-agents').value || 1000,
-    games:    +document.getElementById('p-games').value  || 3,
-    buyIn:    +document.getElementById('p-buyin').value  || 5,
-    cut:      (+document.getElementById('p-cut').value   || 20) / 100,
-    supply:   +document.getElementById('p-supply').value || 4000000,
-    rate:     +document.getElementById('p-rate').value   || 100,
+    agents:   +document.getElementById('p-agents').value  || 1000,
+    games:    +document.getElementById('p-games').value   || 3,
+    buyIn:    +document.getElementById('p-buyin').value   || 5,
+    cut:      (+document.getElementById('p-cut').value    || 20) / 100,
+    supply:   +document.getElementById('p-supply').value  || 4000000,
+    rate:     +document.getElementById('p-rate').value    || 100,
+    winners:  (+document.getElementById('p-winners').value || 33) / 100,
     feeStructure,
+    rewardModel,
   };
 }
 
@@ -701,6 +728,225 @@ function renderUseCases(p, c) {
   `;
 }
 
+// ============================================================
+// REWARDS TAB
+// ============================================================
+
+// Payout in COIN for a given rank (1-indexed), under each model
+function payoutFixed(rank, N, totalCOIN, winnerFrac) {
+  const winners = Math.max(1, Math.round(N * winnerFrac));
+  if (rank <= winners) return totalCOIN / winners;
+  return 0;
+}
+
+function payoutProportional(rank, N, totalCOIN) {
+  // Linear decay: rank 1 gets most, rank N gets least (but > 0)
+  // payout(r) = totalCOIN * 2 * (N - r + 1) / (N * (N + 1))
+  return totalCOIN * 2 * (N - rank + 1) / (N * (N + 1));
+}
+
+function payoutTiered(rank, N, totalCOIN) {
+  // Tiers: top 10% → 50% of pool; next 20% → 30%; next 30% → 20%; bottom 40% → 0
+  const tiers = [
+    { upTo: 0.10, share: 0.50 },
+    { upTo: 0.30, share: 0.30 },
+    { upTo: 0.60, share: 0.20 },
+    { upTo: 1.00, share: 0.00 },
+  ];
+  const pct = (rank - 1) / (N - 1); // 0 = 1st, 1 = last
+  let prev = 0;
+  for (const t of tiers) {
+    if (pct < t.upTo) {
+      const tierSize = (t.upTo - prev) * N;
+      return t.share > 0 ? (totalCOIN * t.share) / tierSize : 0;
+    }
+    prev = t.upTo;
+  }
+  return 0;
+}
+
+function getPayout(rank, N, totalCOIN, winnerFrac, model) {
+  if (model === 'fixed')        return payoutFixed(rank, N, totalCOIN, winnerFrac);
+  if (model === 'proportional') return payoutProportional(rank, N, totalCOIN);
+  if (model === 'tiered')       return payoutTiered(rank, N, totalCOIN);
+  return 0;
+}
+
+function renderRewards(p, c) {
+  const N = p.agents;
+  const totalCOIN = p.supply;
+  const winnerFrac = p.winners;
+  const rate = p.rate;
+  const buyInCOIN = p.buyIn * rate;
+
+  // Key percentile ranks to show
+  const percentiles = [
+    { label: '1st',    rank: 1 },
+    { label: 'Top 5%', rank: Math.max(1, Math.round(N * 0.05)) },
+    { label: 'Top 10%',rank: Math.max(1, Math.round(N * 0.10)) },
+    { label: 'Top 25%',rank: Math.max(1, Math.round(N * 0.25)) },
+    { label: 'Top 33%',rank: Math.max(1, Math.round(N * 0.33)) },
+    { label: 'Median', rank: Math.round(N / 2) },
+    { label: 'Top 75%',rank: Math.max(1, Math.round(N * 0.75)) },
+    { label: 'Bottom 10%', rank: Math.max(1, Math.round(N * 0.90)) },
+    { label: 'Last',   rank: N },
+  ];
+
+  // Find break-even rank (minimum rank to cover buy-in cost)
+  let breakEvenRank = null;
+  for (let r = N; r >= 1; r--) {
+    if (getPayout(r, N, totalCOIN, winnerFrac, p.rewardModel) >= buyInCOIN) {
+      breakEvenRank = r;
+      break;
+    }
+  }
+  const breakEvenPct = breakEvenRank ? (breakEvenRank / N * 100).toFixed(0) : 0;
+
+  // Summary cards
+  const top1Payout = getPayout(1, N, totalCOIN, winnerFrac, p.rewardModel);
+  const medianPayout = getPayout(Math.round(N/2), N, totalCOIN, winnerFrac, p.rewardModel);
+  const top10Payout = getPayout(Math.round(N*0.10), N, totalCOIN, winnerFrac, p.rewardModel);
+
+  const modelLabels = { fixed: 'Fixed Payout', proportional: 'Proportional', tiered: 'Tiered' };
+  const modelDescs = {
+    fixed: 'Top winners share the prize pool equally. All others receive zero. Clearest incentive; binary outcome.',
+    proportional: 'Every agent earns proportional to their rank. First place earns the most; last place earns a small positive amount. Reward is distributed smoothly across the entire field.',
+    tiered: 'Bracket system: top 10% receive 50% of pool, next 20% receive 30%, next 30% receive 20%, bottom 40% receive nothing. Middle-class effect — being "above average" matters.'
+  };
+
+  // Comparison table — all three mechanics at each percentile
+  function payoutRow(lbl, rank) {
+    const f = getPayout(rank, N, totalCOIN, winnerFrac, 'fixed');
+    const pr = getPayout(rank, N, totalCOIN, winnerFrac, 'proportional');
+    const t = getPayout(rank, N, totalCOIN, winnerFrac, 'tiered');
+    const current = getPayout(rank, N, totalCOIN, winnerFrac, p.rewardModel);
+    const beStyle = current >= buyInCOIN ? 'color:var(--status-ok)' : 'color:var(--red)';
+    function cell(v) {
+      const usd = v / rate;
+      const profit = v - buyInCOIN;
+      const color = v >= buyInCOIN ? 'var(--status-ok)' : v > 0 ? 'var(--status-warn)' : 'var(--ghost)';
+      return `<td class="num" style="color:${color}">${v > 0 ? fmtCOIN(Math.round(v)) : '—'}<br><span style="font-size:10px;color:var(--dim)">${v > 0 ? fmt$(usd, 0) : ''}</span></td>`;
+    }
+    return `<tr ${rank === Math.round(N/2) ? 'class="highlight-row"' : ''}>
+      <td>${lbl}<br><span style="font-size:11px;color:var(--dim)">rank ${rank.toLocaleString()}</span></td>
+      ${cell(f)} ${cell(pr)} ${cell(t)}
+    </tr>`;
+  }
+
+  // Payout curve bars for current model
+  const curvePoints = [1,5,10,15,20,25,33,40,50,60,75,90,100].map(pctInt => {
+    const rank = Math.max(1, Math.round(N * pctInt / 100));
+    return { pctInt, rank, coin: getPayout(rank, N, totalCOIN, winnerFrac, p.rewardModel) };
+  });
+  const maxCoin = Math.max(...curvePoints.map(pt => pt.coin));
+
+  const curveHTML = curvePoints.map(pt => {
+    const usd = pt.coin / rate;
+    const barPct = maxCoin > 0 ? (pt.coin / maxCoin * 100).toFixed(1) : 0;
+    const isProfitable = pt.coin >= buyInCOIN;
+    const barColor = isProfitable ? '#4ade80' : pt.coin > 0 ? '#c4956a' : '#383838';
+    return `<div class="waterfall-item">
+      <div class="waterfall-label" style="font-size:12px;text-align:right;width:90px">Top ${pt.pctInt}%<br><span style="font-size:10px;color:var(--dim)">rank ${pt.rank.toLocaleString()}</span></div>
+      <div class="waterfall-bar-wrap">
+        <div class="waterfall-bar" style="width:${barPct}%;background:${barColor}20;border:1px solid ${barColor}40;color:${barColor};font-size:11px">
+          ${pt.coin > 0 ? fmtCOIN(Math.round(pt.coin)) + ' · ' + fmt$(usd, 0) : 'no payout'}
+        </div>
+      </div>
+      ${pt.rank <= (breakEvenRank||0) ? '<div style="font-size:10px;color:var(--status-ok);margin-left:4px;white-space:nowrap">✓ profit</div>' : '<div style="font-size:10px;color:var(--ghost);margin-left:4px;white-space:nowrap">loss</div>'}
+    </div>`;
+  }).join('');
+
+  document.getElementById('rewards-content').innerHTML = `
+    <div class="cards">
+      <div class="card accent-coin">
+        <div class="card-label">Model: ${modelLabels[p.rewardModel]}</div>
+        <div class="card-value" style="font-size:18px">${breakEvenRank ? 'Top ' + breakEvenPct + '%' : 'N/A'}</div>
+        <div class="card-sub">break-even rank threshold</div>
+      </div>
+      <div class="card accent-green">
+        <div class="card-label">1st Place Payout</div>
+        <div class="card-value">${fmt$(top1Payout / rate, 0)}</div>
+        <div class="card-sub">${fmtCOIN(Math.round(top1Payout))}</div>
+      </div>
+      <div class="card accent-blue">
+        <div class="card-label">Top 10% Payout</div>
+        <div class="card-value">${fmt$(top10Payout / rate, 0)}</div>
+        <div class="card-sub">${fmtCOIN(Math.round(top10Payout))}</div>
+      </div>
+      <div class="card ${medianPayout >= buyInCOIN ? 'accent-green' : 'accent-amber'}">
+        <div class="card-label">Median Payout</div>
+        <div class="card-value">${fmt$(medianPayout / rate, 2)}</div>
+        <div class="card-sub">${medianPayout >= buyInCOIN ? '✓ above break-even' : '✗ below break-even'}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Mechanic: ${modelLabels[p.rewardModel]}</h3>
+      <div class="open-q" style="margin-bottom:16px">
+        <div style="color:var(--warm)">${modelDescs[p.rewardModel]}</div>
+        ${p.rewardModel === 'fixed' ? `<div style="margin-top:8px;color:var(--muted);font-size:12px">Winners threshold: top ${(winnerFrac*100).toFixed(0)}% (${Math.round(N*winnerFrac).toLocaleString()} of ${N.toLocaleString()} agents). Fixed payout: ${fmtCOIN(Math.round(totalCOIN / (N * winnerFrac)))} each.</div>` : ''}
+        ${p.rewardModel === 'tiered' ? '<div style="margin-top:8px;color:var(--muted);font-size:12px">Brackets: Top 10% → 50% of pool · Next 20% → 30% · Next 30% → 20% · Bottom 40% → nothing.</div>' : ''}
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)">Entry cost: ${fmtCOIN(buyInCOIN)} · Break-even: must finish in top ${breakEvenPct}% (rank ${(breakEvenRank||0).toLocaleString()} or better of ${N.toLocaleString()})</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Payout Curve — ${modelLabels[p.rewardModel]}</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Green bars = profitable (above entry cost). Gold = positive but below break-even. Gray = no payout.</p>
+      <div class="waterfall">${curveHTML}</div>
+    </div>
+
+    <div class="section">
+      <h3>All Three Mechanics — Comparison by Rank</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+        Green = profitable vs. entry cost. Gold = positive but a loss. Highlighted row = median agent.
+        <br>Entry cost: ${fmtCOIN(buyInCOIN)} (${fmt$(p.buyIn)} at ${p.rate}:1). Total prize pool: ${fmtCOIN(totalCOIN)} = ${fmt$(totalCOIN/rate, 0)}.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th class="num">Fixed<br><span style="color:var(--dim);font-size:10px">equal winner share</span></th>
+            <th class="num">Proportional<br><span style="color:var(--dim);font-size:10px">linear decay</span></th>
+            <th class="num">Tiered<br><span style="color:var(--dim);font-size:10px">10/20/30/40 brackets</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${percentiles.map(({label, rank}) => payoutRow(label, rank)).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Incentive Analysis</h3>
+      <table>
+        <thead><tr><th>Mechanic</th><th>Agent Incentive</th><th>Strategy Implication</th><th>Break-even</th></tr></thead>
+        <tbody>
+          <tr ${p.rewardModel==='fixed'?'class="highlight-row"':''}>
+            <td><strong>Fixed</strong></td>
+            <td style="color:var(--muted)">Win or get nothing. Binary threshold.</td>
+            <td style="color:var(--muted)">Pure win-seeking. Cooperation may be sacrificed for marginal rank gain near threshold.</td>
+            <td class="num">Top ${((winnerFrac)*100).toFixed(0)}%</td>
+          </tr>
+          <tr ${p.rewardModel==='proportional'?'class="highlight-row"':''}>
+            <td><strong>Proportional</strong></td>
+            <td style="color:var(--muted)">Every position improvement earns more. No cliff.</td>
+            <td style="color:var(--muted)">Smooth incentive for cooperation — improving rank always pays, even near the bottom. Reduces zero-sum defection pressure.</td>
+            <td class="num">Top ~${(((N+1)/2 - 1/winnerFrac)/(N)*100).toFixed(0) > 0 ? (((N+1)/2 - 1/winnerFrac)/(N)*100).toFixed(0) : '~50'}%</td>
+          </tr>
+          <tr ${p.rewardModel==='tiered'?'class="highlight-row"':''}>
+            <td><strong>Tiered</strong></td>
+            <td style="color:var(--muted)">Bracket cliffs. Incentive spikes near tier boundaries.</td>
+            <td style="color:var(--muted)">Intense competition near cutoffs (e.g., 10% / 30% / 60%). Cooperation within tiers, competition at the margins. Mirrors tournament structure.</td>
+            <td class="num">Top 60%</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;font-size:12px;color:var(--muted)">Highlighted row = currently selected model. Adjust the Reward Mechanics panel left to compare.</p>
+    </div>
+  `;
+}
+
 function renderQuestions() {
   document.getElementById('questions-content').innerHTML = OPEN_QUESTIONS.map((q, i) => `
     <div class="open-q">
@@ -723,6 +969,20 @@ function setFee(type) {
   document.getElementById('fee-desc').textContent = type === 'entry'
     ? 'Fee collected once at buy-in. Simpler for players, lower platform revenue.'
     : 'Fee collected at each game re-entry. ~' + getParams().games + '× platform revenue vs entry-only.';
+  render();
+}
+
+function setRewardModel(model) {
+  rewardModel = model;
+  ['fixed','proportional','tiered'].forEach(m => {
+    document.getElementById('rm-' + m).classList.toggle('active', m === model);
+  });
+  const descs = {
+    fixed: 'Top winners share the prize pool equally. All others receive nothing.',
+    proportional: 'Every agent earns proportional to rank. No hard cutoff — last place still earns a small amount.',
+    tiered: 'Bracket system: top 10% → 50% of pool, next 20% → 30%, next 30% → 20%, bottom 40% → zero.'
+  };
+  document.getElementById('rm-desc').textContent = descs[model];
   render();
 }
 
@@ -751,10 +1011,11 @@ function render() {
   renderSensitivity(p, c);
   renderUseCases(p, c);
   renderQuestions();
+  renderRewards(p, c);
 }
 
 // Bind inputs
-['p-agents','p-games','p-buyin','p-cut','p-supply','p-rate'].forEach(id => {
+['p-agents','p-games','p-buyin','p-cut','p-supply','p-rate','p-winners'].forEach(id => {
   document.getElementById(id).addEventListener('input', render);
 });
 
@@ -763,3 +1024,4 @@ render();
 </script>
 </body>
 </html>
+
