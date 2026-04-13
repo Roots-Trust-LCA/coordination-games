@@ -119,10 +119,10 @@
   .card.accent-green .card-value { color: var(--green); }
   .card.accent-amber { border-color: #78350f; background: #1c0a00; }
   .card.accent-amber .card-value { color: var(--amber); }
-  .card.accent-blue { border-color: #3a2d1e; background: #1a1206; }
-  .card.accent-blue .card-value { color: var(--status-info); }
-  .card.accent-purple { border-color: #3b1f6b; background: #160d2e; }
-  .card.accent-purple .card-value { color: var(--accent2); }
+  .card.accent-teal { border-color: #0d3028; background: #061a16; }
+  .card.accent-teal .card-value { color: var(--status-teal); }
+  .card.accent-orange { border-color: #3d2010; background: #1a0e06; }
+  .card.accent-orange .card-value { color: var(--status-orange); }
   .card.accent-coin { border-color: #3d2e1c; background: #1a130a; }
   .card.accent-coin .card-value { color: var(--gold); }
 
@@ -159,7 +159,7 @@
   .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
   .badge-green { background: #064e3b; color: var(--green); }
   .badge-amber { background: #78350f; color: #fde68a; }
-  .badge-blue { background: #1e3a5f; color: #93c5fd; }
+  .badge-teal { background: #082018; color: var(--status-teal); }
   .badge-muted { background: var(--surface2); color: var(--muted); }
 
   .open-q { background: var(--surface); border-left: 3px solid var(--gold); padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 8px; font-size: 13px; }
@@ -472,8 +472,8 @@ function renderSummaryCards(p, c) {
   const cards = [
     { label: 'Total Prize Pool', value: fmt$(c.totalPot), sub: fmtCOIN(p.supply), cls: 'accent-green' },
     { label: 'Platform Revenue', value: fmt$(c.platformRevenue), sub: p.feeStructure === 'entry' ? 'Entry-only' : 'Per-game', cls: 'accent-amber' },
-    { label: 'Grant Required', value: fmt$(c.grantUSD), sub: fmtCOIN(c.grantCoin), cls: 'accent-blue' },
-    { label: 'RegenHub Total', value: fmt$(c.regenHubRevenue), sub: '10% of infra at full run', cls: 'accent-purple' },
+    { label: 'Grant Required', value: fmt$(c.grantUSD), sub: fmtCOIN(c.grantCoin), cls: 'accent-teal' },
+    { label: 'RegenHub Total', value: fmt$(c.regenHubRevenue), sub: '10% of infra at full run', cls: 'accent-orange' },
     { label: 'COIN Supply', value: fmtCOIN(p.supply), sub: fmt$(c.totalPot) + ' at ' + p.rate + ':1', cls: 'accent-coin' },
     { label: 'Buy-in per Agent', value: fmt$(p.buyIn), sub: p.agents.toLocaleString() + ' agents', cls: '' },
   ];
@@ -488,7 +488,7 @@ function renderRevenueWaterfall(p, c) {
     { label: 'Agent buy-ins (gross)',   value: c.grossBuyIn,       coin: c.coinFromBuyIns, color: '#c4956a' },
     { label: 'Platform fee (platform)', value: -c.platformRevenue, coin: null,             color: '#f87171' },
     { label: 'Buy-ins → prize pool',    value: c.netToPool_BuyIn,  coin: c.netToPool_BuyIn * p.rate, color: '#4ade80' },
-    { label: 'Grant contribution',      value: c.grantUSD,         coin: c.grantCoin,      color: '#a78bfa' },
+    { label: 'Grant contribution',      value: c.grantUSD,         coin: c.grantCoin,      color: '#7ccfb8' },
     { label: 'Total prize pool',        value: c.totalPot,         coin: p.supply,         color: '#c4956a', bold: true },
   ];
   document.getElementById('revenue-waterfall').innerHTML = items.map(({label,value,coin,color,bold}) => {
@@ -559,7 +559,7 @@ function renderMilestone(idx) {
   content.innerHTML = `
     <div class="cards">
       <div class="card"><div class="card-label">Timing</div><div class="card-value" style="font-size:18px">${m.timing}</div><div class="card-sub">${m.phase === 'rehearsal' ? 'Testnet — no real funds' : 'Live'}</div></div>
-      <div class="card accent-blue"><div class="card-label">Infra Budget</div><div class="card-value">${fmt$(m.infra)}</div><div class="card-sub">RegenHub: ${fmt$(m.infra*0.1)}</div></div>
+      <div class="card accent-teal"><div class="card-label">Infra Budget</div><div class="card-value">${fmt$(m.infra)}</div><div class="card-sub">RegenHub: ${fmt$(m.infra*0.1)}</div></div>
       <div class="card ${m.prizes > 0 ? 'accent-green' : ''}"><div class="card-label">Prize Pool</div><div class="card-value">${m.prizes > 0 ? fmt$(m.prizes) : '—'}</div><div class="card-sub">${m.prizes > 0 ? fmtCOIN(m.prizes * p.rate) : 'No prizes this round'}</div></div>
       ${isMain ? `<div class="card accent-coin"><div class="card-label">Buy-in Revenue</div><div class="card-value">${fmt$(c.grossBuyIn)}</div><div class="card-sub">${p.agents.toLocaleString()} agents × ${fmt$(p.buyIn)}</div></div>` : ''}
     </div>
@@ -597,8 +597,8 @@ function renderMilestone(idx) {
 function renderCoinTab(p, c) {
   const cards = [
     { label: 'Total Supply', value: fmtCOIN(p.supply), sub: fmt$(c.totalPot) + ' USD equivalent', cls: 'accent-coin' },
-    { label: 'From Buy-ins', value: fmtCOIN(c.coinFromBuyIns), sub: fmtPct(c.coinFromBuyIns/p.supply) + ' of supply', cls: 'accent-blue' },
-    { label: 'Grant-backed', value: fmtCOIN(c.grantCoin), sub: fmt$(c.grantUSD) + ' grant needed', cls: 'accent-purple' },
+    { label: 'From Buy-ins', value: fmtCOIN(c.coinFromBuyIns), sub: fmtPct(c.coinFromBuyIns/p.supply) + ' of supply', cls: 'accent-teal' },
+    { label: 'Grant-backed', value: fmtCOIN(c.grantCoin), sub: fmt$(c.grantUSD) + ' grant needed', cls: 'accent-orange' },
     { label: 'COIN per Agent', value: (c.buyInCoinGross).toLocaleString(), sub: 'gross at entry · COIN', cls: '' },
   ];
   document.getElementById('coin-cards').innerHTML = cards.map(({label,value,sub,cls}) =>
@@ -610,7 +610,7 @@ function renderCoinTab(p, c) {
     { label: 'Buy-in COIN (1,000 agents)', value: c.coinFromBuyIns, color: '#c4956a' },
     { label: 'Platform fee portion',        value: c.platformRevenue * p.rate, color: '#f87171' },
     { label: 'Net agent COIN',             value: c.netToPool_BuyIn * p.rate, color: '#4ade80' },
-    { label: 'Grant-backed COIN',           value: c.grantCoin, color: '#a78bfa' },
+    { label: 'Grant-backed COIN',           value: c.grantCoin, color: '#7ccfb8' },
   ];
   document.getElementById('coin-waterfall').innerHTML = items.map(({label,value,color}) => {
     const pct = value / max * 100;
@@ -683,7 +683,7 @@ function renderSensitivity(p, c) {
       <td>${cut}%</td>
       <td class="num">${fmt$(cc.platformRevenue)}</td>
       <td class="num">${fmt$(pgRevenue)}</td>
-      <td class="num" style="color:var(--accent2)">${fmt$(pgRevenue - cc.platformRevenue)} more per-game</td>
+      <td class="num" style="color:var(--status-orange)">${fmt$(pgRevenue - cc.platformRevenue)} more per-game</td>
     </tr>`;
   }).join('');
 
@@ -700,7 +700,7 @@ function renderUseCases(p, c) {
   const rows = USE_CASES.map(u => `
     <tr>
       <td>${u.name}</td>
-      <td><span class="badge badge-blue">${u.category}</span></td>
+      <td><span class="badge badge-teal">${u.category}</span></td>
       <td class="num">${fmt$(u.infra)}</td>
       <td class="num">${u.prizes > 0 ? fmt$(u.prizes) : '<span style="color:var(--muted)">—</span>'}</td>
       <td class="num">${fmt$(u.infra + u.prizes)}</td>
@@ -710,7 +710,7 @@ function renderUseCases(p, c) {
   const tp = USE_CASES.reduce((s,u)=>s+u.prizes,0);
   document.getElementById('usecase-content').innerHTML = `
     <div class="cards" style="margin-bottom:20px">
-      <div class="card accent-blue"><div class="card-label">Total Use Case Infra</div><div class="card-value">${fmt$(ti)}</div><div class="card-sub">RegenHub: ${fmt$(ti*0.1)}</div></div>
+      <div class="card accent-teal"><div class="card-label">Total Use Case Infra</div><div class="card-value">${fmt$(ti)}</div><div class="card-sub">RegenHub: ${fmt$(ti*0.1)}</div></div>
       <div class="card accent-green"><div class="card-label">Use Case Prizes</div><div class="card-value">${fmt$(tp)}</div><div class="card-sub">Esports only</div></div>
       <div class="card"><div class="card-label">Use Cases Defined</div><div class="card-value">${USE_CASES.length}</div><div class="card-sub">Each $3K infra</div></div>
     </div>
@@ -868,7 +868,7 @@ function renderRewards(p, c) {
         <div class="card-value">${fmt$(top1Payout / rate, 0)}</div>
         <div class="card-sub">${fmtCOIN(Math.round(top1Payout))}</div>
       </div>
-      <div class="card accent-blue">
+      <div class="card accent-teal">
         <div class="card-label">Top 10% Payout</div>
         <div class="card-value">${fmt$(top10Payout / rate, 0)}</div>
         <div class="card-sub">${fmtCOIN(Math.round(top10Payout))}</div>
