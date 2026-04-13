@@ -1,23 +1,30 @@
-# RegenHub / Techne × Coordination Games & Agent Olympiad
+# Techne as Implementation Partner — Coordination Games & Agent Olympiad
 
-*RegenHub, LCA (DBA Techne Studio) — Boulder, Colorado*  
-*Prepared April 2026 for discussion with Coordination Games / dacc.fund*
+*Lead: Gitcoin / dacc.fund*  
+*Implementation Partner: RegenHub, LCA (DBA Techne Studio) — Boulder, Colorado*  
+*Prepared April 2026*
 
 ---
 
-## Why This Intersection Matters
+## The Partnership
+
+Coordination Games and the Agent Olympiad are led by Gitcoin and dacc.fund. RegenHub / Techne participates as an implementation partner — contributing infrastructure, operating agents, financial modeling, and cooperative structure to support the platform's development and the Olympiad's success.
+
+This document articulates what Techne brings to the partnership and how our work intersects with the platform's goals across the Rehearsal → Main Event arc.
+
+---
+
+## Why Techne
 
 Coordination Games asks a foundational question: can agents — human, AI, or hybrid — practice coordination under real conditions, with real stakes, and get better at it? The Olympiad frames this as sport: structured games, observable performance, iterative improvement across a season of events.
 
-Techne asks a parallel question at the organizational layer: can a cooperative — a small, place-based, multi-stakeholder entity — use AI infrastructure to make its own coordination legible, computable, and improvable over time? We are building the tools we need to run ourselves well, in public, as an open-source contribution to cooperative infrastructure.
+Techne operates at the same layer in a different context. We are a small cooperative using AI infrastructure to make our own coordination legible, computable, and improvable. We build tools to run ourselves well, in public, as an open-source contribution to cooperative infrastructure.
 
-These questions are not adjacent. They are the same question at different scales.
-
-A coordination game is a microcosm of everything a cooperative does: allocate attention, build trust, distribute rewards, surface defection, recover from miscoordination. The Olympiad is a laboratory. Techne is a studio that wants to run experiments, publish findings, and contribute infrastructure that generalizes.
+A coordination game is a microcosm of everything a cooperative does: allocate attention, build trust, distribute rewards, surface defection, recover from miscoordination. The Olympiad is a laboratory. Techne is a studio that wants to run experiments, publish findings, and contribute infrastructure that generalizes — in direct support of what Gitcoin and dacc.fund are building.
 
 ---
 
-## What Techne Brings
+## What Techne Contributes
 
 ### 1. Operating AI Agents with Workshop Coordination Protocol
 
@@ -97,7 +104,7 @@ Beyond direct fees, the coordination games work is a demonstration environment f
 
 Techne's public benefit is "cultivating scenius" — the creative intelligence of a scene, the collective capacity that emerges when the right people are in the right conditions together. The Agent Olympiad is a scenius experiment: can you design the conditions under which coordination intelligence emerges, improves, and compounds?
 
-That's what we're here to find out. Techne brings the cooperative structure, the operating agents, and the accounting infrastructure. Coordination Games brings the game design, the event format, and the network. The intersection is where it gets interesting.
+Gitcoin and dacc.fund bring the game design, the event format, and the network. Techne brings the cooperative structure, the operating agents, and the accounting infrastructure to support and extend that work. The role is implementation partner: present at the layer where protocol meets practice.
 
 ---
 
