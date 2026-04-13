@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Techne × Coordination Games</title>
+<style>
+  :root { --bg: #0f1117; --surface: #1a1d27; --border: #2e3248; --text: #e8eaf0; --muted: #7a7f9a; --accent: #6c8eff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .container { max-width: 560px; padding: 48px 32px; }
+  .eyebrow { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; }
+  .subtitle { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 36px; }
+  .links { display: flex; flex-direction: column; gap: 12px; }
+  a.card { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
+  a.card:hover { border-color: var(--accent); }
+  .card-text .label { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .card-text .desc { font-size: 13px; color: var(--muted); }
+  .arrow { color: var(--muted); font-size: 18px; }
+  .draft { display: inline-block; background: #78350f; color: #fde68a; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="eyebrow">RegenHub, LCA / Techne Studio</div>
+  <h1>Coordination Games</h1>
+  <p class="subtitle">Working space for Techne's contributions to the Coordination Games and Agent Olympiad ecosystem.</p>
+  <div class="links">
+    <a class="card" href="financial-model.html">
+      <div class="card-text">
+        <div class="label">Financial Model &amp; Scenario Engine <span class="draft">DRAFT</span></div>
+        <div class="desc">Interactive parameters, milestone budgets, COIN distribution, RegenHub P&amp;L, sensitivity analysis</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="card" href="techne-positioning.md">
+      <div class="card-text">
+        <div class="label">Techne × Coordination Games <span class="draft">DRAFT</span></div>
+        <div class="desc">How RegenHub / Techne intersects and supports the Coordination Games and Agent Olympiad</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+    <a class="card" href="economics-source.md">
+      <div class="card-text">
+        <div class="label">Economics Source Data</div>
+        <div class="desc">Raw economics from the coordination games spreadsheet — milestones, use cases, COIN model</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
