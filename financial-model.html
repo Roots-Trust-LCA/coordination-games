@@ -38,7 +38,8 @@
     --coin: var(--gold);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 1rem; line-height: 1.6; overflow-x: hidden; }
+  input, select, textarea { font-size: 16px !important; }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
@@ -81,7 +82,7 @@
   .param-group h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 400; color: var(--muted); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
   .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
   .param-row label { font-size: 13px; color: var(--text); flex: 1; }
-  .param-row input[type=number], .param-row input[type=range] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 13px; width: 90px; text-align: right; }
+  .param-row input[type=number], .param-row input[type=range] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 16px; width: 90px; text-align: right; }
   .param-row input[type=number]:focus { outline: none; border-color: var(--accent); }
   .param-row .unit { color: var(--muted); font-size: 12px; min-width: 20px; }
   .param-row input[type=range] { width: 80px; padding: 0; border: none; cursor: pointer; accent-color: var(--accent); }
@@ -99,7 +100,8 @@
 
   /* Main content */
   .main { overflow-y: auto; }
-  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 24px; background: var(--surface); position: sticky; top: 0; z-index: 10; }
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 24px; background: var(--surface); position: sticky; top: 0; z-index: 10; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
   .tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -168,6 +170,15 @@
     .params { border-right: none; border-bottom: 1px solid var(--border); }
     .sens-grid { grid-template-columns: 1fr; }
     .site-nav { position: relative; }
+  }
+
+  @media (max-width: 600px) {
+    .waterfall-label { width: 120px; font-size: 11px; }
+    .waterfall-value { width: 70px; font-size: 11px; }
+    .sens-grid { grid-template-columns: 1fr; }
+    .sens-table-wrap { overflow-x: auto; }
+    table { min-width: 380px; }
+    .nav-back, .tab, .toggle-btn, .milestone-tab { min-height: 44px; display: inline-flex; align-items: center; }
   }
 </style>
 </head>
