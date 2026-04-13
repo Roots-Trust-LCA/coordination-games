@@ -305,6 +305,124 @@
     flex-shrink: 0;
   }
 
+  /* ── Countdown ── */
+  .countdown-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: center;
+  }
+  .cd-left { display: flex; flex-direction: column; gap: 0.3rem; }
+  .cd-milestone-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .cd-milestone-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--parchment);
+  }
+  .cd-milestone-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .cd-timer {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+  .cd-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 44px;
+  }
+  .cd-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--gold);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .cd-unit-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 3px;
+  }
+  .cd-sep {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.4rem;
+    color: var(--ghost);
+    padding-bottom: 4px;
+  }
+  .cd-progress-wrap {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .cd-progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--raised);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .cd-progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+  .cd-progress-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+  .cd-dots {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+  .cd-dot {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ghost);
+    letter-spacing: 0.03em;
+  }
+  .cd-dot-pip {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ghost);
+    flex-shrink: 0;
+  }
+  .cd-dot.done .cd-dot-pip { background: var(--gold); }
+  .cd-dot.now .cd-dot-pip { background: var(--status-ok); box-shadow: 0 0 0 2px #022c22; }
+  .cd-dot.now { color: var(--status-ok); }
+  .cd-dot.done { color: var(--gold); }
+
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  .cd-live { animation: pulse 2s ease-in-out infinite; }
+
   /* ── Footer ── */
   .site-footer {
     border-top: 1px solid var(--border);
@@ -367,6 +485,30 @@
     <div class="header-label">Techne Working Space · April 2026</div>
     <h1>Coordination Games<br>&amp; Agent Olympiad</h1>
     <p class="header-sub">A public arena testing multi-agent coordination, competition, and trust — and Techne's work as implementation partner supporting Gitcoin and dacc.fund.</p>
+
+    <div class="countdown-bar" id="countdown-bar">
+      <div>
+        <div class="cd-left">
+          <div class="cd-milestone-label">Next milestone <span class="cd-live" style="color:var(--status-ok);margin-left:4px">●</span></div>
+          <div class="cd-milestone-name" id="cd-name">—</div>
+          <div class="cd-milestone-desc" id="cd-desc">—</div>
+        </div>
+        <div class="cd-dots" id="cd-dots"></div>
+        <div class="cd-progress-wrap">
+          <div class="cd-progress-track"><div class="cd-progress-fill" id="cd-fill" style="width:0%"></div></div>
+          <div class="cd-progress-label" id="cd-pct">—</div>
+        </div>
+      </div>
+      <div class="cd-timer" id="cd-timer">
+        <div class="cd-unit"><div class="cd-num" id="cd-d">--</div><div class="cd-unit-label">days</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-num" id="cd-h">--</div><div class="cd-unit-label">hrs</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-num" id="cd-m">--</div><div class="cd-unit-label">min</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-num" id="cd-s">--</div><div class="cd-unit-label">sec</div></div>
+      </div>
+    </div>
   </header>
 
   <!-- What this is -->
@@ -600,5 +742,91 @@
   </footer>
 
 </div>
+
+<script>
+  const MILESTONES = [
+    {
+      name: 'Rehearsal 1',
+      date: new Date('2026-04-24T09:00:00-06:00'),
+      desc: 'Testnet tokens · First live platform run · Nou registers as participant agent',
+      phase: 'rehearsal'
+    },
+    {
+      name: 'Dress Rehearsal 1',
+      date: new Date('2026-05-06T09:00:00-06:00'),
+      desc: 'Private alpha · $1K prizes · co-op.us lobby prototype',
+      phase: 'dr1'
+    },
+    {
+      name: 'Dress Rehearsal 2',
+      date: new Date('2026-05-16T09:00:00-06:00'),
+      desc: 'Private alpha with partners · $2K prizes · Expanded agent roster',
+      phase: 'dr2'
+    },
+    {
+      name: 'Main Event',
+      date: new Date('2026-05-27T09:00:00-06:00'),
+      desc: '$40,000 prize pool · 1,000+ agents · Full public launch',
+      phase: 'main'
+    }
+  ];
+
+  const SEASON_START = new Date('2026-04-13T00:00:00-06:00');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const now = new Date();
+
+    // Find next upcoming milestone
+    let nextIdx = MILESTONES.findIndex(m => m.date > now);
+    if (nextIdx === -1) {
+      // All done
+      document.getElementById('cd-name').textContent = 'Season complete';
+      document.getElementById('cd-desc').textContent = 'All milestones delivered.';
+      document.getElementById('cd-timer').style.display = 'none';
+      renderDots(MILESTONES.length, null);
+      return;
+    }
+
+    const next = MILESTONES[nextIdx];
+    const diff = next.date - now;
+
+    const totalD = Math.floor(diff / 86400000);
+    const totalH = Math.floor((diff % 86400000) / 3600000);
+    const totalM = Math.floor((diff % 3600000) / 60000);
+    const totalS = Math.floor((diff % 60000) / 1000);
+
+    document.getElementById('cd-name').textContent = next.name;
+    document.getElementById('cd-desc').textContent = next.desc;
+    document.getElementById('cd-d').textContent = pad(totalD);
+    document.getElementById('cd-h').textContent = pad(totalH);
+    document.getElementById('cd-m').textContent = pad(totalM);
+    document.getElementById('cd-s').textContent = pad(totalS);
+
+    // Progress bar — from previous milestone (or season start) to next
+    const from = nextIdx === 0 ? SEASON_START : MILESTONES[nextIdx - 1].date;
+    const span = next.date - from;
+    const elapsed = now - from;
+    const pct = Math.max(0, Math.min(100, (elapsed / span) * 100));
+    document.getElementById('cd-fill').style.width = pct.toFixed(1) + '%';
+    document.getElementById('cd-pct').textContent = pct.toFixed(0) + '% to ' + next.name;
+
+    renderDots(nextIdx, nextIdx);
+  }
+
+  function renderDots(doneCount, nowIdx) {
+    const el = document.getElementById('cd-dots');
+    el.innerHTML = MILESTONES.map((m, i) => {
+      let cls = 'cd-dot';
+      if (i < doneCount) cls += ' done';
+      if (i === nowIdx) cls += ' now';
+      return `<div class="${cls}"><div class="cd-dot-pip"></div>${m.name}</div>`;
+    }).join('');
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>
 </body>
 </html>
