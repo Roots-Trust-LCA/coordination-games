@@ -17,7 +17,7 @@
     --status-info: #8bbfff; --status-purple: #a78bfa; --status-teal: #7ccfb8;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--void); color: var(--warm); font-family: Inter, system-ui, sans-serif; font-size: 0.95rem; line-height: 1.75; }
+  body { background: var(--void); color: var(--warm); font-family: Inter, system-ui, sans-serif; font-size: 1rem; line-height: 1.75; overflow-x: hidden; }
   a { color: var(--gold); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
@@ -96,7 +96,7 @@
   }
   .cta-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
   .btn {
-    display: inline-block; padding: 0.55rem 1.25rem; border-radius: 4px;
+    display: inline-block; padding: 0.65rem 1.25rem; border-radius: 4px;
     font-size: 0.85rem; font-weight: 500; transition: all 0.15s; white-space: nowrap;
     text-decoration: none;
   }
@@ -114,10 +114,14 @@
   hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 
   @media (max-width: 600px) {
-    h1 { font-size: 1.9rem; }
+    h1 { font-size: 2rem; }
     .game-row { grid-template-columns: 1fr; }
     .timeline-mini { flex-direction: column; }
     .tl-item { border-right: none; border-bottom: 1px solid var(--border-dim); }
+  }
+
+  @media (max-width: 420px) {
+    .nav-label { display: none; }
   }
 </style>
 </head>
