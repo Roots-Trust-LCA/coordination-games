@@ -156,6 +156,11 @@
   .milestone-tab:hover { color: var(--text); }
   .milestone-tab.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
 
+  /* Outcome network */
+  .outcome-legend { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+  .outcome-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .outcome-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
   .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
   .badge-green { background: #064e3b; color: var(--green); }
   .badge-amber { background: #78350f; color: #fde68a; }
@@ -293,6 +298,10 @@
       <div class="section">
         <h3>RegenHub P&amp;L (full execution)</h3>
         <div id="regen-pnl"></div>
+      </div>
+      <div class="section">
+        <h3>Agent Outcome Network</h3>
+        <div id="outcome-network"></div>
       </div>
     </div>
 
@@ -999,6 +1008,75 @@ function showMilestone(idx) {
   renderMilestone(idx);
 }
 
+function renderOutcomeNetwork(p, c) {
+  const N = p.agents;
+  const totalCOIN = p.supply;
+  const winnerFrac = p.winners;
+  const rate = p.rate;
+  const buyInCOIN = p.buyIn * rate;
+
+  // Sample up to 400 representative agents sorted by rank
+  const MAX_DOTS = 400;
+  const sampleSize = Math.min(N, MAX_DOTS);
+  const agentsPerDot = N / sampleSize;
+
+  let countProfit = 0, countPositive = 0, countZero = 0;
+  const dotCats = [];
+  for (let i = 0; i < sampleSize; i++) {
+    const rank = Math.ceil((i + 0.5) / sampleSize * N);
+    const payout = getPayout(rank, N, totalCOIN, winnerFrac, p.rewardModel);
+    let cat;
+    if (payout >= buyInCOIN)  { cat = 'profit'; countProfit++; }
+    else if (payout > 0)      { cat = 'pos';    countPositive++; }
+    else                       { cat = 'zero';   countZero++; }
+    dotCats.push(cat);
+  }
+
+  // Scale sampled counts back to full N
+  const fullProfit   = Math.round(countProfit   * agentsPerDot);
+  const fullPositive = Math.round(countPositive * agentsPerDot);
+  const fullZero     = N - fullProfit - fullPositive;
+
+  // Hex grid layout — wide panorama
+  const COLS = 40;
+  const ROWS = Math.ceil(sampleSize / COLS);
+  const R   = 5;
+  const HX  = R * 2 + 2;          // horizontal center-to-center
+  const HY  = HX * 0.866;         // vertical center-to-center (hex packing)
+  const svgW = COLS * HX + HX / 2;
+  const svgH = ROWS * HY + R * 2;
+
+  const COLOR  = { profit: '#4ade80', pos: '#c4956a', zero: '#2a2a2a' };
+  const STROKE = { profit: '#064e3b', pos: '#78350f', zero: '#383838' };
+  const OPACITY = { profit: 0.9, pos: 0.85, zero: 0.45 };
+
+  const dots = dotCats.map((cat, i) => {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    const cx = (col * HX + (row % 2 === 1 ? HX / 2 : 0) + R).toFixed(1);
+    const cy = (row * HY + R).toFixed(1);
+    const r  = i === 0 ? R + 2 : R;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${COLOR[cat]}" fill-opacity="${OPACITY[cat]}" stroke="${STROKE[cat]}" stroke-width="0.5"/>`;
+  }).join('');
+
+  const pctProfit   = (fullProfit / N * 100).toFixed(0);
+  const pctPositive = (fullPositive / N * 100).toFixed(0);
+  const modelName   = { fixed: 'Fixed', proportional: 'Proportional', tiered: 'Tiered' }[p.rewardModel];
+  const dotNote     = agentsPerDot > 1.5 ? ` · each dot ≈ ${Math.round(agentsPerDot)} agents` : '';
+
+  document.getElementById('outcome-network').innerHTML = `
+    <div class="outcome-legend">
+      <div class="outcome-legend-item"><div class="outcome-dot" style="background:#4ade80"></div>${fullProfit.toLocaleString()} profit (${pctProfit}%)</div>
+      ${fullPositive > 0 ? `<div class="outcome-legend-item"><div class="outcome-dot" style="background:#c4956a"></div>${fullPositive.toLocaleString()} positive (${pctPositive}%)</div>` : ''}
+      <div class="outcome-legend-item"><div class="outcome-dot" style="background:#2a2a2a;border:1px solid #383838"></div>${fullZero.toLocaleString()} no reward</div>
+    </div>
+    <svg viewBox="0 0 ${svgW.toFixed(0)} ${svgH.toFixed(0)}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;border-radius:6px;background:var(--surface)">
+      ${dots}
+    </svg>
+    <p style="margin-top:8px;font-size:11px;color:var(--dim)">${modelName} mechanics · ${N.toLocaleString()} agents${dotNote} · sorted best → worst, left to right</p>
+  `;
+}
+
 function render() {
   const p = getParams();
   const c = calc(p);
@@ -1006,6 +1084,7 @@ function render() {
   renderSummaryCards(p, c);
   renderRevenueWaterfall(p, c);
   renderRegenPnL(p, c);
+  renderOutcomeNetwork(p, c);
   renderMilestone(currentMilestone);
   renderCoinTab(p, c);
   renderSensitivity(p, c);
