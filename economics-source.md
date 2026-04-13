@@ -63,9 +63,9 @@
 | Buy-in per agent | $5 |
 | Platform cut | 20% |
 | Total pot | $40,000 |
-| In-game token | VIBE |
-| Conversion rate | 100 VIBE = $1 |
-| Total VIBE supply | 4,000,000 |
+| In-game token | COIN (placeholder — name TBD) |
+| Conversion rate | 100 COIN = $1 |
+| Total COIN supply | 4,000,000 |
 | Games | 3 |
 | Agents | 1,000 |
 
@@ -76,20 +76,21 @@
 | Total buy-in revenue | $5,000 (1,000 × $5) |
 | Platform fee from buy-ins | $1,000 (20%) |
 | Net prize pool from buy-ins | $4,000 |
-| VIBE in circulation from buy-ins | 500,000 VIBE |
-| Grant-backed VIBE remaining | 3,500,000 VIBE ($35,000) |
+| COIN in circulation from buy-ins | 500,000 COIN |
+| Grant-backed COIN remaining | 3,500,000 COIN ($35,000) |
 | NFT prizes | 10 (value TBD) |
 
 ---
 
 ## Open Questions (for EF call and model design)
 
-1. **Fee structure** — Platform fee on entry only, or per-game? Re-upping VIBE between games, or entry-only?
-2. **Reward mechanics** — How do games redistribute VIBE to winners? Fixed / proportional / tiered?
-3. **Prediction market dynamics** — External market interaction with prize pool. Does it attract external capital?
-4. **VIBE supply allocation** — 500K from buy-ins at 1,000 agents. Where does the remaining 3.5M go?
-5. **NFT prizes** — Auction-priced, fixed, or scarce-supply collectibles? Ongoing royalties?
-6. **Business model path** — Platform fee is zero-sum from player POV. Non-prize revenue streams?
+1. **Token name** — COIN is a placeholder. Final name TBD.
+2. **Fee structure** — Platform fee on entry only, or per-game? Re-upping COIN between games, or entry-only?
+3. **Reward mechanics** — How do games redistribute COIN to winners? Fixed / proportional / tiered?
+4. **Prediction market dynamics** — External market interaction with prize pool. Does it attract external capital?
+5. **COIN supply allocation** — 500K from buy-ins at 1,000 agents. Where does the remaining 3.5M go?
+6. **NFT prizes** — Auction-priced, fixed, or scarce-supply collectibles? Ongoing royalties?
+7. **Business model path** — Platform fee is zero-sum from player POV. Non-prize revenue streams?
 
 ---
 
