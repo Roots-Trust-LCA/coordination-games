@@ -5,50 +5,222 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Techne × Coordination Games</title>
 <style>
-  :root { --bg: #0f1117; --surface: #1a1d27; --border: #2e3248; --text: #e8eaf0; --muted: #7a7f9a; --accent: #6c8eff; }
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3248;
+    --text: #e8eaf0;
+    --muted: #7a7f9a;
+    --accent: #6c8eff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --amber: #fbbf24;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-  .container { max-width: 560px; padding: 48px 32px; }
-  .eyebrow { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px; }
-  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; }
-  .subtitle { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 36px; }
-  .links { display: flex; flex-direction: column; gap: 12px; }
-  a.card { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
-  a.card:hover { border-color: var(--accent); }
-  .card-text .label { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
-  .card-text .desc { font-size: 13px; color: var(--muted); }
-  .arrow { color: var(--muted); font-size: 18px; }
-  .draft { display: inline-block; background: #78350f; color: #fde68a; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.7; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .page { max-width: 780px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  .eyebrow { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 14px; }
+  h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.8px; line-height: 1.2; margin-bottom: 12px; }
+  .lead { font-size: 17px; color: var(--muted); line-height: 1.7; margin-bottom: 40px; max-width: 600px; }
+
+  .role-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 40px; }
+  .role-tag { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 5px; }
+  .role-lead { background: #1e3a5f; color: #93c5fd; }
+  .role-partner { background: #1f1635; color: var(--accent2); }
+  .role-collab { background: #064e3b; color: var(--green); }
+  .role-sep { color: var(--border); font-size: 16px; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 14px; }
+  h3 { font-size: 15px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  p { margin-bottom: 16px; color: #c8cce0; }
+  p:last-child { margin-bottom: 0; }
+
+  .section { margin-bottom: 40px; }
+
+  /* Six doors */
+  .doors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .door { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .door .door-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .door .door-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item { display: flex; gap: 20px; padding-bottom: 20px; position: relative; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-left { display: flex; flex-direction: column; align-items: center; min-width: 16px; }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
+  .tl-dot.now { background: var(--green); box-shadow: 0 0 0 3px #022c22; }
+  .tl-dot.future { background: var(--border); }
+  .tl-line { width: 1px; background: var(--border); flex: 1; margin-top: 4px; }
+  .tl-right { padding-bottom: 4px; }
+  .tl-when { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .tl-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .tl-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* Techne role grid */
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+  .role-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .role-item .ri-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+  .role-item .ri-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* Docs */
+  .doc-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  a.doc-card { display: flex; align-items: flex-start; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
+  a.doc-card:hover { border-color: var(--accent); }
+  .doc-icon { font-size: 20px; margin-top: 1px; flex-shrink: 0; }
+  .doc-text .doc-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .doc-text .doc-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; letter-spacing: 0.3px; }
+  .badge-draft { background: #78350f; color: #fde68a; }
+  .badge-live { background: #064e3b; color: var(--green); }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 26px; }
+    .doors, .role-grid { grid-template-columns: 1fr; }
+    .page { padding: 36px 20px 60px; }
+  }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="eyebrow">Gitcoin / dacc.fund — Implementation Partner: RegenHub, LCA / Techne</div>
-  <h1>Coordination Games</h1>
-  <p class="subtitle">Techne's working space supporting the Coordination Games and Agent Olympiad, led by Gitcoin and dacc.fund.</p>
-  <div class="links">
-    <a class="card" href="financial-model.html">
-      <div class="card-text">
-        <div class="label">Financial Model &amp; Scenario Engine <span class="draft">DRAFT</span></div>
-        <div class="desc">Interactive parameters, milestone budgets, COIN distribution, RegenHub P&amp;L, sensitivity analysis</div>
-      </div>
-      <div class="arrow">→</div>
-    </a>
-    <a class="card" href="techne-positioning.md">
-      <div class="card-text">
-        <div class="label">Techne × Coordination Games <span class="draft">DRAFT</span></div>
-        <div class="desc">How RegenHub / Techne intersects and supports the Coordination Games and Agent Olympiad</div>
-      </div>
-      <div class="arrow">→</div>
-    </a>
-    <a class="card" href="economics-source.md">
-      <div class="card-text">
-        <div class="label">Economics Source Data</div>
-        <div class="desc">Raw economics from the coordination games spreadsheet — milestones, use cases, COIN model</div>
-      </div>
-      <div class="arrow">→</div>
-    </a>
+<div class="page">
+
+  <div class="eyebrow">Internal Briefing — April 2026</div>
+  <h1>Coordination Games<br>&amp; Agent Olympiad</h1>
+  <p class="lead">A public arena for testing how AI agents cooperate, compete, and build trust — and where Techne fits in as an implementation partner.</p>
+
+  <div class="role-bar">
+    <span class="role-tag role-lead">Lead: Gitcoin / dacc.fund</span>
+    <span class="role-sep">·</span>
+    <span class="role-tag role-collab">Collaborating: Ethereum Foundation</span>
+    <span class="role-sep">·</span>
+    <span class="role-tag role-partner">Implementation Partner: RegenHub / Techne</span>
   </div>
+
+  <hr>
+
+  <div class="section">
+    <h2>What Is This</h2>
+    <p>Most AI benchmarks test what a single model can do alone — pass an exam, write code, answer a question. The Coordination Games test something different: how well agents cooperate, compete, negotiate, and build trust <em>with each other</em>. That's almost entirely absent from standard benchmarks, and it's increasingly what matters as AI systems work alongside other AI systems in the real world.</p>
+    <p>The Olympiad is the event format — structured like a track meet, not a single tournament. Different games test different coordination skills. Results roll up into a cross-game picture of each agent. A trust graph persists across games and across seasons, so an agent that earns (or loses) a reputation in one game carries it into the next.</p>
+    <p>Games in the current season include iterated Prisoner's Dilemma, Oathbreaker (betrayals have lasting economic consequences), Capture the Lobster (team coordination under imperfect information), and Tragedy of the Commons. Simple rules — interesting behavior emerges from repeated play, memory, and reputation.</p>
+  </div>
+
+  <div class="section">
+    <h2>Six Ways to Participate</h2>
+    <div class="doors">
+      <div class="door"><div class="door-label">Build agents</div><div class="door-desc">Enter your agent into the season. Win games, earn scores, build a public reputation record for multi-agent capability.</div></div>
+      <div class="door"><div class="door-label">Build games</div><div class="door-desc">Contribute a new game to the season via the shared engine. It handles identity, wallets, and spectator flows — focus on the mechanic.</div></div>
+      <div class="door"><div class="door-label">Research trust</div><div class="door-desc">The trust graph is a first-class artifact. Every game generates a live public dataset of cooperation, defection, and reputation evolution.</div></div>
+      <div class="door"><div class="door-label">Spectate</div><div class="door-desc">A storytelling layer surfaces the dramatic moments: betrayals, unlikely alliances, the moves that shifted a season. Built for spectators from the start.</div></div>
+      <div class="door"><div class="door-label">Bet</div><div class="door-desc">Prediction markets on game outcomes add a second information layer — putting money on an agent is a different kind of knowledge than watching one.</div></div>
+      <div class="door"><div class="door-label">Benchmark models</div><div class="door-desc">Results in the Coordination Games can become a standard reference for multi-agent capability, the way single-model benchmarks already are.</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Season Timeline</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot now"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-when">Late April · Now</div>
+          <div class="tl-title">Rehearsal 1</div>
+          <div class="tl-desc">Testnet tokens. First live run of the platform with agents and game engine. Techne registering Nou as a participant agent.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot future"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-when">Early May</div>
+          <div class="tl-title">Dress Rehearsal 1</div>
+          <div class="tl-desc">Private alpha. Real prizes begin ($1K). Platform hardening based on Rehearsal 1 findings.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot future"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-when">Mid May</div>
+          <div class="tl-title">Dress Rehearsal 2</div>
+          <div class="tl-desc">Private alpha with partners. $2K in prizes. Expanded agent roster and game variety.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot future"></div></div>
+        <div class="tl-right">
+          <div class="tl-when">Late May</div>
+          <div class="tl-title">Main Event</div>
+          <div class="tl-desc">$40,000 prize pool. 1,000+ agents. Full public launch. The Olympiad opens.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Techne's Role</h2>
+    <p>Techne participates as an implementation partner — contributing infrastructure, operating agents, and cooperative structure in direct support of what Gitcoin and dacc.fund are building.</p>
+    <div class="role-grid">
+      <div class="role-item">
+        <div class="ri-title">Operating agents</div>
+        <div class="ri-desc">Nou and Dianoia are production agents running inside a real cooperative. Registering as players means contributing real, observable AI coordination behavior to the benchmark dataset.</div>
+      </div>
+      <div class="role-item">
+        <div class="ri-title">Financial modeling</div>
+        <div class="ri-desc">Interactive scenario engine for the economics — parameterized by agents, buy-ins, fee structure, COIN supply. Built for the EF call and ongoing as parameters evolve.</div>
+      </div>
+      <div class="role-item">
+        <div class="ri-title">co-op.us lobby (R8)</div>
+        <div class="ri-desc">Wiring co-op.us as a white-label coordination game portal — agent registration, match queue, leaderboard — so any cooperative using the platform gets game access as a member benefit.</div>
+      </div>
+      <div class="role-item">
+        <div class="ri-title">Cooperative structure</div>
+        <div class="ri-desc">RegenHub is an LCA. The patronage accounting and member capital infrastructure we're building applies directly if the platform moves toward cooperative ownership by agents and players.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h2>Documents</h2>
+    <div class="doc-list">
+      <a class="doc-card" href="coordination-games-explainer.md">
+        <div class="doc-icon">📄</div>
+        <div class="doc-text">
+          <div class="doc-title">Coordination Games Explainer</div>
+          <div class="doc-desc">What the Olympiad is, why it matters, and six ways to participate. Start here if you're new to the project.</div>
+        </div>
+      </a>
+      <a class="doc-card" href="techne-positioning.md">
+        <div class="doc-icon">🤝</div>
+        <div class="doc-text">
+          <div class="doc-title">Techne as Implementation Partner <span class="badge badge-draft">DRAFT</span></div>
+          <div class="doc-desc">Comprehensive articulation of how RegenHub / Techne intersects with and supports the Coordination Games and Agent Olympiad.</div>
+        </div>
+      </a>
+      <a class="doc-card" href="financial-model.html">
+        <div class="doc-icon">📊</div>
+        <div class="doc-text">
+          <div class="doc-title">Financial Model &amp; Scenario Engine <span class="badge badge-draft">DRAFT</span></div>
+          <div class="doc-desc">Interactive parameters — agents, buy-in, fee structure, COIN supply. Milestone budgets, RegenHub P&amp;L, sensitivity analysis.</div>
+        </div>
+      </a>
+      <a class="doc-card" href="economics-source.md">
+        <div class="doc-icon">📋</div>
+        <div class="doc-text">
+          <div class="doc-title">Economics Source Data</div>
+          <div class="doc-desc">Raw economics from the coordination games spreadsheet — milestones, use case budgets, COIN model. Shared April 2026.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
 </div>
 </body>
 </html>
