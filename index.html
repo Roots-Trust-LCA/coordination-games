@@ -659,6 +659,92 @@
     white-space: nowrap;
   }
 
+  /* ── Main nav ── */
+  .main-nav {
+    position: sticky; top: 0; z-index: 200;
+    background: var(--void); border-bottom: 1px solid var(--border);
+  }
+  .main-nav-inner {
+    max-width: 960px; margin: 0 auto; padding: 0 2rem;
+    display: flex; align-items: center; height: 48px; gap: 0;
+  }
+  .main-nav-brand {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; letter-spacing: 0.06em;
+    color: var(--parchment); white-space: nowrap; margin-right: 2rem;
+    text-decoration: none; flex-shrink: 0;
+  }
+  .main-nav-brand:hover { color: var(--gold); text-decoration: none; }
+  .main-nav-links {
+    display: flex; align-items: stretch; list-style: none; gap: 0; height: 100%; flex: 1;
+  }
+  .main-nav-links > li {
+    position: relative; display: flex; align-items: stretch;
+  }
+  .main-nav-links > li > a,
+  .nav-dropdown-trigger {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.06em;
+    color: var(--dim); padding: 0 0.9rem; display: flex; align-items: center;
+    background: none; border: none; cursor: pointer; white-space: nowrap;
+    text-decoration: none; transition: color 0.15s; border-bottom: 2px solid transparent;
+    height: 100%;
+  }
+  .main-nav-links > li > a:hover,
+  .nav-dropdown-trigger:hover { color: var(--warm); text-decoration: none; }
+  .nav-dropdown-trigger.open { color: var(--gold); }
+  .dropdown-arrow { margin-left: 4px; font-size: 0.6rem; transition: transform 0.15s; display: inline-block; }
+  .nav-dropdown-trigger.open .dropdown-arrow { transform: rotate(180deg); }
+
+  .nav-dropdown {
+    display: none; position: absolute; top: 100%; left: 0;
+    min-width: 240px; background: var(--surface); border: 1px solid var(--border);
+    border-top: none; border-radius: 0 0 6px 6px; list-style: none; z-index: 300;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .nav-dropdown.open { display: block; }
+  .nav-dropdown li { border-bottom: 1px solid var(--border-dim); }
+  .nav-dropdown li:last-child { border-bottom: none; }
+  .nav-dropdown a {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem;
+    font-size: 0.83rem; color: var(--warm); text-decoration: none;
+    transition: background 0.1s, color 0.1s; min-height: 44px;
+  }
+  .nav-dropdown a:hover { background: var(--panel); color: var(--parchment); text-decoration: none; }
+  .dd-tag {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gold); opacity: 0.7;
+    min-width: 76px; flex-shrink: 0;
+  }
+
+  .nav-hamburger {
+    display: none; margin-left: auto; background: none; border: none;
+    color: var(--dim); cursor: pointer; padding: 0;
+    min-height: 44px; min-width: 44px; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .nav-hamburger:hover { color: var(--warm); }
+
+  @media (max-width: 680px) {
+    .main-nav-inner { padding: 0 1rem; position: relative; }
+    .nav-hamburger { display: flex; }
+    .main-nav-links {
+      display: none; position: absolute; top: 48px; left: 0; right: 0;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-direction: column; height: auto; padding: 0.5rem 0; z-index: 400;
+    }
+    .main-nav-links.open { display: flex; }
+    .main-nav-links > li { height: auto; }
+    .main-nav-links > li > a,
+    .nav-dropdown-trigger {
+      padding: 0.75rem 1.25rem; height: auto; border-bottom: none;
+      border-top: 1px solid var(--border-dim); width: 100%; justify-content: space-between;
+    }
+    .nav-dropdown {
+      position: static; border: none; border-radius: 0;
+      box-shadow: none; background: var(--panel);
+    }
+    .nav-dropdown a { padding-left: 2rem; }
+  }
+
   hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 
   @media (max-width: 700px) {
@@ -696,6 +782,32 @@
 </style>
 </head>
 <body>
+
+<nav class="main-nav">
+  <div class="main-nav-inner">
+    <a href="#" class="main-nav-brand">Coordination Games</a>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false">&#9776;</button>
+    <ul class="main-nav-links" id="main-nav-links">
+      <li><a href="#season">Season</a></li>
+      <li><a href="#status">Status</a></li>
+      <li class="has-dropdown">
+        <button class="nav-dropdown-trigger" id="dd-trigger" aria-haspopup="true" aria-expanded="false">
+          Six Perspectives <span class="dropdown-arrow">&#9662;</span>
+        </button>
+        <ul class="nav-dropdown" id="dd-menu" role="menu">
+          <li><a href="agent-builder/" role="menuitem"><span class="dd-tag">Agent</span> Agent Builder</a></li>
+          <li><a href="game-builder/" role="menuitem"><span class="dd-tag">Game</span> Game Builder</a></li>
+          <li><a href="researcher/" role="menuitem"><span class="dd-tag">Research</span> Researcher</a></li>
+          <li><a href="spectator/" role="menuitem"><span class="dd-tag">Spectator</span> Spectator</a></li>
+          <li><a href="bettor/" role="menuitem"><span class="dd-tag">Bettor</span> Bettor / Predictor</a></li>
+          <li><a href="model-developer/" role="menuitem"><span class="dd-tag">Model Dev</span> Model Developer</a></li>
+        </ul>
+      </li>
+      <li><a href="financial-model.html">Financial Model</a></li>
+    </ul>
+  </div>
+</nav>
+
 <div class="page">
 
   <!-- Header -->
@@ -898,7 +1010,7 @@
   </div>
 
   <!-- Season timeline -->
-  <div class="section">
+  <div class="section" id="season">
     <div class="section-label">Season</div>
     <h2>Timeline</h2>
     <div class="timeline">
@@ -938,7 +1050,7 @@
   </div>
 
   <!-- Status board -->
-  <div class="section">
+  <div class="section" id="status">
     <div class="section-label">Delivery Status</div>
     <h2>Where Things Stand</h2>
     <div class="status-board">
@@ -1267,6 +1379,58 @@
 
   tick();
   setInterval(tick, 1000);
+
+  // ── Nav dropdown & hamburger ──
+  const ddTrigger = document.getElementById('dd-trigger');
+  const ddMenu    = document.getElementById('dd-menu');
+  const hamburger = document.getElementById('nav-hamburger');
+  const navLinks  = document.getElementById('main-nav-links');
+
+  ddTrigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const open = ddMenu.classList.toggle('open');
+    ddTrigger.classList.toggle('open', open);
+    ddTrigger.setAttribute('aria-expanded', open);
+  });
+
+  hamburger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const open = navLinks.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', open);
+    // close dropdown when toggling hamburger
+    ddMenu.classList.remove('open');
+    ddTrigger.classList.remove('open');
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function() {
+    ddMenu.classList.remove('open');
+    ddTrigger.classList.remove('open');
+    ddTrigger.setAttribute('aria-expanded', false);
+  });
+
+  // Close mobile nav on link click
+  navLinks.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      navLinks.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', false);
+    });
+  });
+
+  // Highlight active nav link based on scroll
+  const sections = { season: '#season', status: '#status' };
+  const navAnchors = document.querySelectorAll('.main-nav-links > li > a[href^="#"]');
+  window.addEventListener('scroll', function() {
+    const y = window.scrollY + 80;
+    navAnchors.forEach(function(a) {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target && target.offsetTop <= y && target.offsetTop + target.offsetHeight > y) {
+        a.style.color = 'var(--gold)';
+      } else {
+        a.style.color = '';
+      }
+    });
+  }, { passive: true });
 </script>
 </body>
 </html>
