@@ -4,38 +4,81 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coordination Games — Financial Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --border: #2e3248;
-    --text: #e8eaf0;
-    --muted: #7a7f9a;
-    --accent: #6c8eff;
-    --accent2: #a78bfa;
-    --green: #34d399;
-    --amber: #fbbf24;
+    --void: #0c0c0c;
+    --surface: #161616;
+    --panel: #222222;
+    --raised: #2a2a2a;
+    --border: #383838;
+    --border-dim: #2a2a2a;
+    --gold: #c4956a;
+    --parchment: #f0f0f0;
+    --warm: #d0d0d0;
+    --muted: #9a9a9a;
+    --dim: #707070;
+    --ghost: #505050;
+    --status-ok: #4ade80;
+    --status-warn: #fbbf24;
+    --status-info: #8bbfff;
+    --status-purple: #a78bfa;
+    --status-teal: #7ccfb8;
+    /* aliases for compat */
+    --bg: var(--void);
+    --surface2: var(--panel);
+    --text: var(--parchment);
+    --accent: var(--gold);
+    --accent2: var(--status-purple);
+    --green: var(--status-ok);
+    --amber: var(--status-warn);
     --red: #f87171;
-    --coin: #f59e0b;
+    --coin: var(--gold);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
-  .header { padding: 24px 32px 16px; border-bottom: 1px solid var(--border); }
-  .header h1 { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
-  .header .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
-  .draft-badge { display: inline-block; background: #78350f; color: #fde68a; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; letter-spacing: 0.5px; }
+  /* ── Nav ── */
+  .site-nav {
+    position: sticky; top: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px;
+    background: var(--void);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-back {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .nav-back:hover { color: var(--gold); text-decoration: none; }
+  .nav-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ghost);
+  }
 
-  .layout { display: grid; grid-template-columns: 300px 1fr; gap: 0; height: calc(100vh - 73px); }
+  .header { padding: 24px 32px 16px; border-bottom: 1px solid var(--border); }
+  .header h1 { font-size: 20px; font-weight: 400; font-family: Georgia, 'Libre Baskerville', serif; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .draft-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; background: #1c1000; color: var(--status-warn); font-size: 10px; font-weight: 400; padding: 2px 8px; border-radius: 3px; margin-left: 10px; vertical-align: middle; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid #3d2e00; }
+
+  .layout { display: grid; grid-template-columns: 300px 1fr; gap: 0; height: calc(100vh - 114px); }
 
   /* Parameter Panel */
   .params { background: var(--surface); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
-  .params h2 { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 16px; }
+  .params h2 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 400; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
   .param-group { margin-bottom: 20px; }
-  .param-group h3 { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .param-group h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 400; color: var(--muted); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
   .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
   .param-row label { font-size: 13px; color: var(--text); flex: 1; }
   .param-row input[type=number], .param-row input[type=range] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 13px; width: 90px; text-align: right; }
@@ -44,7 +87,7 @@
   .param-row input[type=range] { width: 80px; padding: 0; border: none; cursor: pointer; accent-color: var(--accent); }
   .toggle-group { display: flex; gap: 4px; }
   .toggle-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
-  .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .toggle-btn.active { background: var(--gold); border-color: var(--gold); color: var(--void); }
 
   .derived-box { background: var(--surface2); border-radius: 8px; padding: 12px; margin-top: 8px; }
   .derived-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
@@ -74,19 +117,19 @@
   .card.accent-green .card-value { color: var(--green); }
   .card.accent-amber { border-color: #78350f; background: #1c0a00; }
   .card.accent-amber .card-value { color: var(--amber); }
-  .card.accent-blue { border-color: #1e3a5f; background: #0a1628; }
-  .card.accent-blue .card-value { color: var(--accent); }
+  .card.accent-blue { border-color: #3a2d1e; background: #1a1206; }
+  .card.accent-blue .card-value { color: var(--status-info); }
   .card.accent-purple { border-color: #3b1f6b; background: #160d2e; }
   .card.accent-purple .card-value { color: var(--accent2); }
-  .card.accent-coin { border-color: #78350f; background: #1c0f00; }
-  .card.accent-coin .card-value { color: var(--coin); }
+  .card.accent-coin { border-color: #3d2e1c; background: #1a130a; }
+  .card.accent-coin .card-value { color: var(--gold); }
 
   /* Tables */
   .section { margin-bottom: 28px; }
-  .section h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+  .section h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 400; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
-  td { padding: 10px 12px; border-bottom: 1px solid #1e2235; }
+  th { font-family: 'IBM Plex Mono', monospace; text-align: left; color: var(--muted); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border-dim); }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--surface); }
   .num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -102,7 +145,7 @@
 
   /* Sensitivity */
   .sens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .sens-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .sens-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
   .sens-table-wrap h4 { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
 
   /* Milestone tabs */
@@ -117,17 +160,23 @@
   .badge-blue { background: #1e3a5f; color: #93c5fd; }
   .badge-muted { background: var(--surface2); color: var(--muted); }
 
-  .open-q { background: var(--surface); border-left: 3px solid var(--accent2); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 13px; }
-  .open-q strong { color: var(--accent2); }
+  .open-q { background: var(--surface); border-left: 3px solid var(--gold); padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 8px; font-size: 13px; }
+  .open-q strong { color: var(--gold); }
 
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; height: auto; }
     .params { border-right: none; border-bottom: 1px solid var(--border); }
     .sens-grid { grid-template-columns: 1fr; }
+    .site-nav { position: relative; }
   }
 </style>
 </head>
 <body>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-back">← Coordination Games</a>
+  <span class="nav-title">Financial Model &amp; Scenario Engine</span>
+</nav>
 
 <div class="header">
   <h1>Coordination Games — Financial Model <span class="draft-badge">ROUGH DRAFT</span></h1>
@@ -272,10 +321,10 @@
 // DATA
 // ============================================================
 const MILESTONES = [
-  { name: 'Rehearsal 1',       infra: 3000,  prizes: 0,     timing: 'Late April',  notes: 'Testnet Tokens',               phase: 'rehearsal' },
-  { name: 'Dress Rehearsal 1', infra: 5000,  prizes: 1000,  timing: 'Early May',   notes: 'Private Alpha',                phase: 'dr1' },
-  { name: 'Dress Rehearsal 2', infra: 5000,  prizes: 2000,  timing: 'Mid May',     notes: 'Private Alpha with partners',  phase: 'dr2' },
-  { name: 'Main Event',        infra: 10000, prizes: 40000, timing: 'Late May',     notes: 'Full public launch',           phase: 'main' },
+  { name: 'Rehearsal 1',       infra: 3000,  prizes: 0,     timing: 'Apr 24',    notes: 'Testnet tokens · Nou registers as agent',    phase: 'rehearsal' },
+  { name: 'Dress Rehearsal 1', infra: 5000,  prizes: 1000,  timing: 'May 6',     notes: 'Private alpha · $1K prizes',                 phase: 'dr1' },
+  { name: 'Dress Rehearsal 2', infra: 5000,  prizes: 2000,  timing: 'May 16',    notes: 'Private alpha with partners · $2K prizes',   phase: 'dr2' },
+  { name: 'Main Event',        infra: 10000, prizes: 40000, timing: 'May 27',    notes: 'Full public launch · $40K prize pool',        phase: 'main' },
 ];
 
 const USE_CASES = [
@@ -398,11 +447,11 @@ function renderSummaryCards(p, c) {
 function renderRevenueWaterfall(p, c) {
   const max = c.grossBuyIn + c.grantUSD;
   const items = [
-    { label: 'Agent buy-ins (gross)',   value: c.grossBuyIn,       coin: c.coinFromBuyIns, color: '#6c8eff' },
+    { label: 'Agent buy-ins (gross)',   value: c.grossBuyIn,       coin: c.coinFromBuyIns, color: '#c4956a' },
     { label: 'Platform fee (platform)', value: -c.platformRevenue, coin: null,             color: '#f87171' },
-    { label: 'Buy-ins → prize pool',    value: c.netToPool_BuyIn,  coin: c.netToPool_BuyIn * p.rate, color: '#34d399' },
+    { label: 'Buy-ins → prize pool',    value: c.netToPool_BuyIn,  coin: c.netToPool_BuyIn * p.rate, color: '#4ade80' },
     { label: 'Grant contribution',      value: c.grantUSD,         coin: c.grantCoin,      color: '#a78bfa' },
-    { label: 'Total prize pool',        value: c.totalPot,         coin: p.supply,         color: '#f59e0b', bold: true },
+    { label: 'Total prize pool',        value: c.totalPot,         coin: p.supply,         color: '#c4956a', bold: true },
   ];
   document.getElementById('revenue-waterfall').innerHTML = items.map(({label,value,coin,color,bold}) => {
     const pct = Math.abs(value) / c.totalPot * 100;
@@ -520,9 +569,9 @@ function renderCoinTab(p, c) {
 
   const max = p.supply;
   const items = [
-    { label: 'Buy-in COIN (1,000 agents)', value: c.coinFromBuyIns, color: '#6c8eff' },
+    { label: 'Buy-in COIN (1,000 agents)', value: c.coinFromBuyIns, color: '#c4956a' },
     { label: 'Platform fee portion',        value: c.platformRevenue * p.rate, color: '#f87171' },
-    { label: 'Net agent COIN',             value: c.netToPool_BuyIn * p.rate, color: '#34d399' },
+    { label: 'Net agent COIN',             value: c.netToPool_BuyIn * p.rate, color: '#4ade80' },
     { label: 'Grant-backed COIN',           value: c.grantCoin, color: '#a78bfa' },
   ];
   document.getElementById('coin-waterfall').innerHTML = items.map(({label,value,color}) => {
