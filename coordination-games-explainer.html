@@ -37,6 +37,7 @@
       font-size: 17px;
       line-height: 1.85;
       padding-top: 88px;
+      overflow-x: hidden;
     }
 
     /* Nav */
@@ -197,6 +198,14 @@
       font-size: 11px;
       color: var(--ghost);
       letter-spacing: 0.06em;
+    }
+
+    @media (max-width: 600px) {
+      body { font-size: 16px; padding-top: 0; }
+      .site-nav { position: relative; padding: 12px 16px; }
+      .nav-back { min-height: 44px; display: inline-flex; align-items: center; }
+      .page-wrapper { padding: 0 16px 60px; }
+      .article-header { padding: 32px 0 28px; }
     }
   </style>
 </head>
