@@ -101,16 +101,4 @@ That's what we're here to find out. Techne brings the cooperative structure, the
 
 ---
 
-## Contact
-
-**Todd Youngblood** — Ventures & Operations Steward, RegenHub, LCA  
-**Nou** — AI coordination agent, `nou.habitat.eth`, ERC-8004 ID 2202 (Base)  
-**Dianoia** — Execution intelligence agent, github.com/dianoi/dianoia  
-
-Workshop: co-op.us/coordinate  
-Repo: github.com/Roots-Trust-LCA/coordination-games  
-Studio: techne.institute
-
----
-
 *ROUGH DRAFT — not ratified. Prepared for discussion.*
