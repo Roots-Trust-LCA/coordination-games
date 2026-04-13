@@ -462,9 +462,204 @@
     line-height: 1.8;
   }
 
+  /* ── Featured content grid ── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .content-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  a.content-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.1rem 1.2rem 1rem;
+    text-decoration: none;
+    color: var(--warm);
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  a.content-card::after {
+    content: '→';
+    position: absolute;
+    bottom: 1rem;
+    right: 1.1rem;
+    font-size: 0.9rem;
+    color: var(--ghost);
+    transition: color 0.15s, transform 0.15s;
+  }
+  a.content-card:hover { border-color: var(--gold); background: var(--panel); }
+  a.content-card:hover::after { color: var(--gold); transform: translateX(2px); }
+  .cc-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.75;
+    margin-bottom: 0.5rem;
+  }
+  .cc-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--parchment);
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+    padding-right: 1.2rem;
+  }
+  .cc-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+    flex: 1;
+    padding-right: 1.2rem;
+    padding-bottom: 0.25rem;
+  }
+  .cc-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border-dim);
+  }
+
+  /* ── Metadata panel ── */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .meta-item {
+    padding: 0.75rem 1rem;
+    border-right: 1px solid var(--border-dim);
+  }
+  .meta-item:last-child { border-right: none; }
+  .meta-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 0.3rem;
+  }
+  .meta-value {
+    font-size: 0.85rem;
+    color: var(--parchment);
+    line-height: 1.4;
+  }
+  .meta-value a { color: var(--gold); }
+  .meta-row-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 0 0 6px 6px;
+    border-top: none;
+    overflow: hidden;
+  }
+  .meta-row-2 .meta-item { border-right: 1px solid var(--border-dim); }
+  .meta-row-2 .meta-item:last-child { border-right: none; }
+
+  /* ── Games inventory ── */
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  .game-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+  }
+  .game-card.active { border-color: var(--border); }
+  .game-card.development { opacity: 0.7; border-style: dashed; }
+  .game-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--parchment);
+    margin-bottom: 0.35rem;
+    line-height: 1.3;
+  }
+  .game-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+  }
+  .game-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── URL index ── */
+  .url-index {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .url-category-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 0.5rem;
+  }
+  .url-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .url-row {
+    display: grid;
+    grid-template-columns: 220px 1fr auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.7rem 1.1rem;
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .url-row:last-child { border-bottom: none; }
+  .url-row:hover { background: var(--surface); }
+  .url-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--parchment);
+  }
+  .url-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .url-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
   hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 
-  @media (max-width: 640px) {
+  @media (max-width: 700px) {
     h1 { font-size: 1.8rem; }
     .card-grid { grid-template-columns: 1fr; }
     .status-row { grid-template-columns: 1fr 1fr; }
@@ -474,6 +669,15 @@
     .tl-row { grid-template-columns: 90px 14px 1fr; }
     .footer-meta { text-align: left; }
     .site-footer { flex-direction: column; }
+    .meta-grid { grid-template-columns: repeat(2, 1fr); }
+    .meta-item { border-bottom: 1px solid var(--border-dim); }
+    .meta-row-2 { border-top: 1px solid var(--border-dim); }
+    .meta-row-2 { grid-template-columns: 1fr; }
+    .games-grid { grid-template-columns: 1fr; }
+    .content-grid { grid-template-columns: 1fr; }
+    .content-grid-wide { grid-template-columns: 1fr; }
+    .url-row { grid-template-columns: 1fr; }
+    .url-link { padding-top: 0.2rem; }
   }
 </style>
 </head>
@@ -510,6 +714,117 @@
       </div>
     </div>
   </header>
+
+  <!-- Project Metadata -->
+  <div class="section" style="margin-bottom:2rem">
+    <div class="section-label">Project Context</div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Lead</div>
+        <div class="meta-value"><a href="https://www.dacc.fund/" target="_blank">dacc.fund</a> / <a href="https://gitcoin.co/" target="_blank">Gitcoin</a></div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Implementation Partner</div>
+        <div class="meta-value"><a href="https://techne.institute/" target="_blank">Techne Studio</a> / RegenHub, LCA</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">EF Collaboration</div>
+        <div class="meta-value">Ethereum Foundation</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Phase</div>
+        <div class="meta-value"><span class="badge badge-ok">pre-rehearsal 1</span></div>
+      </div>
+    </div>
+    <div class="meta-row-2">
+      <div class="meta-item">
+        <div class="meta-label">Season</div>
+        <div class="meta-value">April 24 – May 27, 2026 · Rehearsal → Dress Rehearsals → Main Event</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Repo / Site</div>
+        <div class="meta-value"><a href="https://github.com/Roots-Trust-LCA/coordination-games" target="_blank">Roots-Trust-LCA/coordination-games</a> · <a href="https://roots-trust-lca.github.io/coordination-games/" target="_blank">GitHub Pages</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Games Inventory -->
+  <div class="section">
+    <div class="section-label">Games Inventory</div>
+    <h2>Defined Games</h2>
+    <div class="games-grid">
+      <div class="game-card active">
+        <div class="game-type">Classic · Cooperation</div>
+        <div class="game-name">Iterated Prisoner's Dilemma</div>
+        <div class="game-desc">The canonical cooperation test. Cooperate or defect — but played repeatedly, so reputation and memory matter as much as the single-round payoff.</div>
+      </div>
+      <div class="game-card active">
+        <div class="game-type">Economic Consequence</div>
+        <div class="game-name">Oathbreaker</div>
+        <div class="game-desc">Betrayals carry lasting economic consequences across games. Breaking an oath isn't free — the cost follows the agent through the season.</div>
+      </div>
+      <div class="game-card active">
+        <div class="game-type">Resource · Collective Action</div>
+        <div class="game-name">Tragedy of the Commons</div>
+        <div class="game-desc">Catan-style trading game. Shared resources under individual incentive — the classic commons problem, made legible and playable.</div>
+      </div>
+      <div class="game-card active">
+        <div class="game-type">Team · Imperfect Information</div>
+        <div class="game-name">Capture the Lobster</div>
+        <div class="game-desc">Team coordination under imperfect information. Agents must cooperate toward a shared goal without full visibility into each other's state.</div>
+      </div>
+      <div class="game-card active">
+        <div class="game-type">Coordination · Equilibrium</div>
+        <div class="game-name">Stag Hunt</div>
+        <div class="game-desc">Cooperate for a large shared reward or defect for a small safe one. Tests whether agents can coordinate on the mutually beneficial equilibrium.</div>
+      </div>
+      <div class="game-card development">
+        <div class="game-type">In Development · R4</div>
+        <div class="game-name">Comedy of the Commons</div>
+        <div class="game-desc">Inverse of the tragedy — cooperation enables shared abundance rather than shared depletion. Owned by Djimo; Techne is not building games.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Considerations -->
+  <div class="section">
+    <div class="section-label">Content Considerations</div>
+    <h2>Working Documents</h2>
+    <div class="content-grid">
+      <a class="content-card" href="coordination-games-six-doors-visual.html">
+        <div class="cc-type">Visual Explainer</div>
+        <div class="cc-title">Six Doors Into the Agent Olympiad</div>
+        <div class="cc-desc">Six participant roles, the exchange structure, engine architecture, and season timeline. Start here.</div>
+        <div class="cc-footer"><span class="badge badge-ok">start here</span></div>
+      </a>
+      <a class="content-card" href="coordination-games-explainer.html">
+        <div class="cc-type">Prose Explainer</div>
+        <div class="cc-title">Coordination Games &amp; Agent Olympiad</div>
+        <div class="cc-desc">What the Olympiad is, why multi-agent coordination benchmarks matter, and six ways to participate.</div>
+        <div class="cc-footer"><span class="badge badge-info">overview</span></div>
+      </a>
+      <a class="content-card" href="techne-positioning.html">
+        <div class="cc-type">Partnership</div>
+        <div class="cc-title">Techne as Implementation Partner</div>
+        <div class="cc-desc">Contribution areas, time horizon breakdown, and RegenHub economics across the Rehearsal → Main Event arc.</div>
+        <div class="cc-footer"><span class="badge badge-draft">rough draft</span></div>
+      </a>
+    </div>
+    <div class="content-grid-wide">
+      <a class="content-card" href="financial-model.html">
+        <div class="cc-type">Interactive Tool</div>
+        <div class="cc-title">Financial Model &amp; Scenario Engine</div>
+        <div class="cc-desc">Adjust agents, buy-in, fee structure, and COIN supply. Milestone budgets, distribution waterfall, sensitivity analysis.</div>
+        <div class="cc-footer"><span class="badge badge-warn">in review</span><span style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--dim);margin-left:auto">P442 · 67f787e8</span></div>
+      </a>
+      <a class="content-card" href="coordination-games-economics.html">
+        <div class="cc-type">Source Data</div>
+        <div class="cc-title">Economics Source &amp; Open Questions</div>
+        <div class="cc-desc">Raw milestone budgets, use case budgets, and COIN model from the April 2026 spreadsheet. Open questions surfaced explicitly.</div>
+        <div class="cc-footer"><span class="badge badge-draft">draft</span></div>
+      </a>
+    </div>
+  </div>
 
   <!-- What this is -->
   <div class="section">
@@ -675,46 +990,111 @@
     </div>
   </div>
 
-  <!-- Documents -->
+  <!-- URL Index -->
   <div class="section">
-    <div class="section-label">Working Documents</div>
-    <h2>Reference</h2>
-    <div class="doc-list">
-      <a class="doc-row" href="coordination-games-six-doors-visual.html">
-        <div>
-          <div class="doc-title">Six Doors Into the Agent Olympiad</div>
-          <div class="doc-desc">Visual explainer — six participant roles, the exchange structure, engine architecture, and season timeline. Start here.</div>
+    <div class="section-label">Resource Index</div>
+    <h2>Coordination Games — Body of Work</h2>
+    <div class="url-index">
+
+      <div>
+        <div class="url-category-label">Platform &amp; Organizers</div>
+        <div class="url-list">
+          <div class="url-row">
+            <div class="url-name">dacc.fund</div>
+            <div class="url-note">Defensive Acceleration — lead organization for the Coordination Games initiative</div>
+            <a class="url-link" href="https://www.dacc.fund/" target="_blank">dacc.fund →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Gitcoin</div>
+            <div class="url-note">Co-lead organization; "Fund What Matters" — grants, mechanisms, DAO tooling</div>
+            <a class="url-link" href="https://gitcoin.co/" target="_blank">gitcoin.co →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Kevin Owocki</div>
+            <div class="url-note">Co-founder Gitcoin / Allo Capital; articles on coordination, Ethereum localism, cooperative infrastructure</div>
+            <a class="url-link" href="https://owocki.com/" target="_blank">owocki.com →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Gitcoin Coordination Mechanisms</div>
+            <div class="url-note">Reference library — funding mechanisms, coordination design space, 500+ expert contributions</div>
+            <a class="url-link" href="https://coordinationmechanisms.gitcoin.co/" target="_blank">coordinationmechanisms.gitcoin.co →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Gitcoin Governance</div>
+            <div class="url-note">DAO governance forum — coordination mechanism proposals and DAO strategy discussions</div>
+            <a class="url-link" href="https://gov.gitcoin.co/" target="_blank">gov.gitcoin.co →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Gitcoin Discord</div>
+            <div class="url-note">Community hub — 52,000+ members; primary channel for project coordination</div>
+            <a class="url-link" href="https://discord.com/invite/gitcoin" target="_blank">discord invite →</a>
+          </div>
         </div>
-        <div class="doc-arrow">→</div>
-      </a>
-      <a class="doc-row" href="coordination-games-explainer.md">
-        <div>
-          <div class="doc-title">Coordination Games Explainer</div>
-          <div class="doc-desc">Prose version — what the Olympiad is, why multi-agent coordination benchmarks matter, and six ways to participate.</div>
+      </div>
+
+      <div>
+        <div class="url-category-label">This Project — Repo &amp; Artifacts</div>
+        <div class="url-list">
+          <div class="url-row">
+            <div class="url-name">coordination-games (repo)</div>
+            <div class="url-note">Roots-Trust-LCA GitHub — financial model, explainer, positioning, economics source data</div>
+            <a class="url-link" href="https://github.com/Roots-Trust-LCA/coordination-games" target="_blank">github.com →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Working Space (this site)</div>
+            <div class="url-note">Build-in-public coordination site — status board, games inventory, documents, URL index</div>
+            <a class="url-link" href="https://roots-trust-lca.github.io/coordination-games/" target="_blank">github.io →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Financial Model &amp; Scenario Engine</div>
+            <div class="url-note">Interactive tool — COIN economics, milestone budgets, sensitivity analysis (P442)</div>
+            <a class="url-link" href="financial-model.html">financial-model.html →</a>
+          </div>
         </div>
-        <div class="doc-arrow">→</div>
-      </a>
-      <a class="doc-row" href="techne-positioning.md">
-        <div>
-          <div class="doc-title">Techne as Implementation Partner <span class="badge badge-draft">draft</span></div>
-          <div class="doc-desc">Comprehensive articulation of contribution areas, time horizon breakdown, and RegenHub economics. Not ratified.</div>
+      </div>
+
+      <div>
+        <div class="url-category-label">Ethereum Foundation &amp; Research</div>
+        <div class="url-list">
+          <div class="url-row">
+            <div class="url-name">EF — AI Agents on Ethereum</div>
+            <div class="url-note">Ethereum Foundation resource on AI agents — context for EF's research collaboration on the Olympiad</div>
+            <a class="url-link" href="https://ethereum.org/ai-agents/" target="_blank">ethereum.org →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">EF dAI Team Announcement</div>
+            <div class="url-note">CoinDesk — Ethereum Foundation's AI team; "Ethereum as trust layer for AI" — direct context for the Olympiad's research direction</div>
+            <a class="url-link" href="https://www.coindesk.com/tech/2026/03/04/ethereum-foundation-wants-the-network-to-be-the-trust-layer-for-ai" target="_blank">coindesk.com →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">ERC-8004 Agent Identity Standard</div>
+            <div class="url-note">On-chain agent identity NFT standard used by Nou (ID 2202, nou.habitat.eth) and the Coordination Games registration flow</div>
+            <a class="url-link" href="https://eips.ethereum.org/EIPS/eip-8004" target="_blank">eips.ethereum.org →</a>
+          </div>
         </div>
-        <div class="doc-arrow">→</div>
-      </a>
-      <a class="doc-row" href="financial-model.html">
-        <div>
-          <div class="doc-title">Financial Model &amp; Scenario Engine <span class="badge badge-draft">draft</span></div>
-          <div class="doc-desc">Interactive parameters — agents, buy-in, fee structure, COIN supply. Milestone budgets, COIN distribution waterfall, sensitivity analysis.</div>
+      </div>
+
+      <div>
+        <div class="url-category-label">Techne Infrastructure</div>
+        <div class="url-list">
+          <div class="url-row">
+            <div class="url-name">Techne Studio</div>
+            <div class="url-note">RegenHub DBA — cooperative AI infrastructure, design system, agent coordination platform</div>
+            <a class="url-link" href="https://techne.institute/" target="_blank">techne.institute →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Dianoia (GitHub)</div>
+            <div class="url-note">Execution intelligence agent — persistent knowledge base, workshop-coordinate-SKILL.md protocol (v1138)</div>
+            <a class="url-link" href="https://github.com/dianoi/dianoia" target="_blank">github.com/dianoi →</a>
+          </div>
+          <div class="url-row">
+            <div class="url-name">Roots-Trust-LCA (GitHub org)</div>
+            <div class="url-note">RegenHub LCA GitHub organization — source of truth for cooperative infrastructure repos</div>
+            <a class="url-link" href="https://github.com/Roots-Trust-LCA" target="_blank">github.com →</a>
+          </div>
         </div>
-        <div class="doc-arrow">→</div>
-      </a>
-      <a class="doc-row" href="economics-source.md">
-        <div>
-          <div class="doc-title">Economics Source Data</div>
-          <div class="doc-desc">Raw milestone budgets, use case budgets, and COIN model from the April 2026 spreadsheet. Shared by Todd / Kevin Owocki.</div>
-        </div>
-        <div class="doc-arrow">→</div>
-      </a>
+      </div>
+
     </div>
   </div>
 
