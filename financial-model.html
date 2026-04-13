@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coordination Games — Financial Model</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3248;
+    --text: #e8eaf0;
+    --muted: #7a7f9a;
+    --accent: #6c8eff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --coin: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .header { padding: 24px 32px 16px; border-bottom: 1px solid var(--border); }
+  .header h1 { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .draft-badge { display: inline-block; background: #78350f; color: #fde68a; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; letter-spacing: 0.5px; }
+
+  .layout { display: grid; grid-template-columns: 300px 1fr; gap: 0; height: calc(100vh - 73px); }
+
+  /* Parameter Panel */
+  .params { background: var(--surface); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+  .params h2 { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 16px; }
+  .param-group { margin-bottom: 20px; }
+  .param-group h3 { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+  .param-row label { font-size: 13px; color: var(--text); flex: 1; }
+  .param-row input[type=number], .param-row input[type=range] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 13px; width: 90px; text-align: right; }
+  .param-row input[type=number]:focus { outline: none; border-color: var(--accent); }
+  .param-row .unit { color: var(--muted); font-size: 12px; min-width: 20px; }
+  .param-row input[type=range] { width: 80px; padding: 0; border: none; cursor: pointer; accent-color: var(--accent); }
+  .toggle-group { display: flex; gap: 4px; }
+  .toggle-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .derived-box { background: var(--surface2); border-radius: 8px; padding: 12px; margin-top: 8px; }
+  .derived-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+  .derived-row .label { color: var(--muted); }
+  .derived-row .value { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .derived-row .value.green { color: var(--green); }
+  .derived-row .value.amber { color: var(--amber); }
+  .derived-row .value.coin { color: var(--coin); }
+
+  /* Main content */
+  .main { overflow-y: auto; }
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 24px; background: var(--surface); position: sticky; top: 0; z-index: 10; }
+  .tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .panel { display: none; padding: 24px; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .card .card-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .card .card-value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .card.accent-green { border-color: #064e3b; background: #022c22; }
+  .card.accent-green .card-value { color: var(--green); }
+  .card.accent-amber { border-color: #78350f; background: #1c0a00; }
+  .card.accent-amber .card-value { color: var(--amber); }
+  .card.accent-blue { border-color: #1e3a5f; background: #0a1628; }
+  .card.accent-blue .card-value { color: var(--accent); }
+  .card.accent-purple { border-color: #3b1f6b; background: #160d2e; }
+  .card.accent-purple .card-value { color: var(--accent2); }
+  .card.accent-coin { border-color: #78350f; background: #1c0f00; }
+  .card.accent-coin .card-value { color: var(--coin); }
+
+  /* Tables */
+  .section { margin-bottom: 28px; }
+  .section h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid #1e2235; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .highlight-row td { background: var(--surface2); font-weight: 600; }
+
+  /* Waterfall */
+  .waterfall { margin-bottom: 24px; }
+  .waterfall-item { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .waterfall-bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 28px; overflow: hidden; position: relative; }
+  .waterfall-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; }
+  .waterfall-label { width: 180px; font-size: 13px; color: var(--text); text-align: right; }
+  .waterfall-value { width: 100px; font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); }
+
+  /* Sensitivity */
+  .sens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .sens-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .sens-table-wrap h4 { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+
+  /* Milestone tabs */
+  .milestone-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .milestone-tab { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .milestone-tab:hover { color: var(--text); }
+  .milestone-tab.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+  .badge-green { background: #064e3b; color: var(--green); }
+  .badge-amber { background: #78350f; color: #fde68a; }
+  .badge-blue { background: #1e3a5f; color: #93c5fd; }
+  .badge-muted { background: var(--surface2); color: var(--muted); }
+
+  .open-q { background: var(--surface); border-left: 3px solid var(--accent2); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 13px; }
+  .open-q strong { color: var(--accent2); }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; height: auto; }
+    .params { border-right: none; border-bottom: 1px solid var(--border); }
+    .sens-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Coordination Games — Financial Model <span class="draft-badge">ROUGH DRAFT</span></h1>
+  <div class="subtitle">Interactive scenario engine · Built for EF call · Source: <a href="https://github.com/Roots-Trust-LCA/coordination-games/blob/main/economics-source.md" target="_blank">economics-source.md</a> · Token name TBD (placeholder: COIN)</div>
+</div>
+
+<div class="layout">
+  <!-- Parameter Panel -->
+  <div class="params">
+    <h2>Parameters</h2>
+
+    <div class="param-group">
+      <h3>Participants</h3>
+      <div class="param-row">
+        <label>Agents</label>
+        <input type="number" id="p-agents" value="1000" min="1" max="100000" step="100">
+      </div>
+      <div class="param-row">
+        <label>Games per agent</label>
+        <input type="number" id="p-games" value="3" min="1" max="20" step="1">
+      </div>
+    </div>
+
+    <div class="param-group">
+      <h3>Economics</h3>
+      <div class="param-row">
+        <label>Buy-in</label>
+        <input type="number" id="p-buyin" value="5" min="0.01" max="1000" step="0.5">
+        <span class="unit">$</span>
+      </div>
+      <div class="param-row">
+        <label>Platform cut</label>
+        <input type="number" id="p-cut" value="20" min="0" max="50" step="1">
+        <span class="unit">%</span>
+      </div>
+      <div class="param-row">
+        <label>COIN supply</label>
+        <input type="number" id="p-supply" value="4000000" min="100000" max="100000000" step="100000">
+      </div>
+      <div class="param-row">
+        <label>COIN / $1</label>
+        <input type="number" id="p-rate" value="100" min="1" max="10000" step="1">
+      </div>
+    </div>
+
+    <div class="param-group">
+      <h3>Fee Structure</h3>
+      <div style="margin-bottom:8px; font-size:12px; color:var(--muted);">How is the platform fee charged?</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="fee-entry" onclick="setFee('entry')">Entry only</button>
+        <button class="toggle-btn" id="fee-game" onclick="setFee('per-game')">Per game</button>
+      </div>
+      <div style="margin-top:8px; font-size:12px; color:var(--muted);" id="fee-desc">
+        Fee collected once at buy-in. 3× cheaper for platform, simpler for players.
+      </div>
+    </div>
+
+    <div class="param-group">
+      <h3>Derived</h3>
+      <div class="derived-box" id="derived-box">
+        <!-- updated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('summary')">Summary</div>
+      <div class="tab" onclick="showTab('milestones')">Milestones</div>
+      <div class="tab" onclick="showTab('coin')">COIN Distribution</div>
+      <div class="tab" onclick="showTab('sensitivity')">Sensitivity</div>
+      <div class="tab" onclick="showTab('usecases')">Use Cases</div>
+      <div class="tab" onclick="showTab('questions')">Open Questions</div>
+    </div>
+
+    <!-- SUMMARY TAB -->
+    <div class="panel active" id="tab-summary">
+      <div class="cards" id="summary-cards"></div>
+      <div class="section">
+        <h3>Revenue Flow</h3>
+        <div class="waterfall" id="revenue-waterfall"></div>
+      </div>
+      <div class="section">
+        <h3>RegenHub P&amp;L (full execution)</h3>
+        <div id="regen-pnl"></div>
+      </div>
+    </div>
+
+    <!-- MILESTONES TAB -->
+    <div class="panel" id="tab-milestones">
+      <div class="milestone-tabs">
+        <div class="milestone-tab active" onclick="showMilestone(0)">Rehearsal 1</div>
+        <div class="milestone-tab" onclick="showMilestone(1)">Dress Rehearsal 1</div>
+        <div class="milestone-tab" onclick="showMilestone(2)">Dress Rehearsal 2</div>
+        <div class="milestone-tab" onclick="showMilestone(3)">Main Event</div>
+        <div class="milestone-tab" onclick="showMilestone(4)">All Milestones</div>
+      </div>
+      <div id="milestone-content"></div>
+    </div>
+
+    <!-- COIN DISTRIBUTION TAB -->
+    <div class="panel" id="tab-coin">
+      <div class="cards" id="coin-cards"></div>
+      <div class="section">
+        <h3>COIN Supply Breakdown</h3>
+        <div class="waterfall" id="coin-waterfall"></div>
+      </div>
+      <div class="section">
+        <h3>Distribution Model</h3>
+        <div id="coin-detail"></div>
+      </div>
+    </div>
+
+    <!-- SENSITIVITY TAB -->
+    <div class="panel" id="tab-sensitivity">
+      <p style="color:var(--muted); margin-bottom:20px; font-size:13px;">
+        Showing how platform revenue and prize pool scale across agent counts, with both fee structures compared.
+      </p>
+      <div class="sens-grid" id="sens-tables"></div>
+      <div class="section" style="margin-top:24px;">
+        <h3>Fee Structure Comparison</h3>
+        <div id="fee-comparison"></div>
+      </div>
+    </div>
+
+    <!-- USE CASES TAB -->
+    <div class="panel" id="tab-usecases">
+      <div id="usecase-content"></div>
+    </div>
+
+    <!-- OPEN QUESTIONS TAB -->
+    <div class="panel" id="tab-questions">
+      <p style="color:var(--muted); margin-bottom:20px; font-size:13px;">Outstanding questions for EF call and model design. Answers will change model outputs significantly.</p>
+      <div id="questions-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const MILESTONES = [
+  { name: 'Rehearsal 1',       infra: 3000,  prizes: 0,     timing: 'Late April',  notes: 'Testnet Tokens',               phase: 'rehearsal' },
+  { name: 'Dress Rehearsal 1', infra: 5000,  prizes: 1000,  timing: 'Early May',   notes: 'Private Alpha',                phase: 'dr1' },
+  { name: 'Dress Rehearsal 2', infra: 5000,  prizes: 2000,  timing: 'Mid May',     notes: 'Private Alpha with partners',  phase: 'dr2' },
+  { name: 'Main Event',        infra: 10000, prizes: 40000, timing: 'Late May',     notes: 'Full public launch',           phase: 'main' },
+];
+
+const USE_CASES = [
+  { name: 'Admin trust introspection', category: 'Research',         infra: 3000, prizes: 0,    notes: '',               lead: '' },
+  { name: 'Attention economy consumer', category: 'Esports',         infra: 3000, prizes: 3000, notes: '',               lead: '' },
+  { name: 'Trencher / gambler',          category: 'Prediction Mkt', infra: 3000, prizes: 0,    notes: 'Jake Hartnell?', lead: 'Jake Hartnell?' },
+  { name: 'New model developer',         category: 'AI Benchmark',   infra: 3000, prizes: 0,    notes: '',               lead: '' },
+  { name: 'Financial model',             category: 'FinModel',        infra: 3000, prizes: 0,    notes: 'R15 — this item', lead: 'Techne' },
+];
+
+const JUMP_BALLS = [
+  { period: 'March', amount: 1400 },
+  { period: 'April', amount: 5000 },
+  { period: 'May',   amount: 5000 },
+];
+
+const OPEN_QUESTIONS = [
+  { q: 'Token name', detail: 'COIN is a placeholder. Final name TBD — being discussed with EF.', impact: 'High (brand, legal)' },
+  { q: 'Fee structure', detail: 'Platform fee on entry only (1× buy-in), or per-game (3× revenue)? Re-upping COIN between games, or entry-only? This is the single biggest variable in platform revenue.', impact: 'High (3× revenue delta)' },
+  { q: 'Reward mechanics', detail: 'How do games redistribute COIN to winners? Fixed payout / proportional to score / tiered? Affects agent strategy and game design.', impact: 'Medium' },
+  { q: 'Prediction market dynamics', detail: 'External markets interacting with prize pool. Could attract external capital beyond buy-ins. Currently unmodeled — significant upside if activated.', impact: 'High (unmodeled upside)' },
+  { q: 'COIN supply allocation', detail: '500K COIN from buy-ins at 1,000 agents (12.5% of supply). Where does the remaining 3.5M go — all prize pool, or some reserved for team/ecosystem?', impact: 'Medium' },
+  { q: 'NFT prizes', detail: 'Auction-priced, fixed, or scarce-supply collectibles? Ongoing royalties from secondary market? 10 NFTs noted — value TBD.', impact: 'Medium' },
+  { q: 'Business model path', detail: 'Platform fee is zero-sum from player POV. What are non-prize revenue streams? SaaS licensing, API access, white-label deals (e.g. co-op.us R8)?', impact: 'High (long-term sustainability)' },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let feeStructure = 'entry';
+let currentMilestone = 0;
+
+function getParams() {
+  return {
+    agents:   +document.getElementById('p-agents').value || 1000,
+    games:    +document.getElementById('p-games').value  || 3,
+    buyIn:    +document.getElementById('p-buyin').value  || 5,
+    cut:      (+document.getElementById('p-cut').value   || 20) / 100,
+    supply:   +document.getElementById('p-supply').value || 4000000,
+    rate:     +document.getElementById('p-rate').value   || 100,
+    feeStructure,
+  };
+}
+
+function calc(p) {
+  const totalPot = p.supply / p.rate; // $40,000
+  const grossBuyIn = p.agents * p.buyIn; // $5,000 (entry-only)
+  const grossBuyInPerGame = p.agents * p.buyIn * p.games; // $15,000 (per-game)
+  const activeBuyIn = p.feeStructure === 'per-game' ? grossBuyInPerGame : grossBuyIn;
+  const platformRevenue = activeBuyIn * p.cut;
+  const netToPool_BuyIn = grossBuyIn * (1 - p.cut); // pool contribution from entry net
+  const coinFromBuyIns = grossBuyIn * p.rate; // gross COIN from entry buy-ins (500K)
+  const grantCoin = p.supply - coinFromBuyIns;
+  const grantUSD = grantCoin / p.rate;
+  const totalPrizePool = totalPot; // fixed by supply
+  const regenHubCut = 0.10;
+
+  // Full execution totals
+  const totalMilestoneInfra = MILESTONES.reduce((s, m) => s + m.infra, 0);
+  const totalMilestonePrizes = MILESTONES.reduce((s, m) => s + m.prizes, 0);
+  const totalUseCaseInfra = USE_CASES.reduce((s, u) => s + u.infra, 0);
+  const totalUseCasePrizes = USE_CASES.reduce((s, u) => s + u.prizes, 0);
+  const totalJumpBalls = JUMP_BALLS.reduce((s, j) => s + j.amount, 0);
+  const totalInfra = totalMilestoneInfra + totalUseCaseInfra + totalJumpBalls;
+  const totalPrizes = totalMilestonePrizes + totalUseCasePrizes;
+  const regenHubRevenue = totalInfra * regenHubCut;
+
+  return {
+    totalPot, grossBuyIn, activeBuyIn, platformRevenue,
+    netToPool_BuyIn, coinFromBuyIns, grantCoin, grantUSD,
+    totalPrizePool,
+    totalMilestoneInfra, totalMilestonePrizes,
+    totalUseCaseInfra, totalUseCasePrizes,
+    totalJumpBalls, totalInfra, totalPrizes,
+    regenHubRevenue,
+    coinPerAgent: p.supply / p.agents,
+    buyInCoinGross: p.buyIn * p.rate,
+  };
+}
+
+// ============================================================
+// FORMAT HELPERS
+// ============================================================
+function fmt$(n, decimals=0) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}); }
+function fmtCOIN(n) { return n.toLocaleString('en-US', {maximumFractionDigits:0}) + ' COIN'; }
+function fmtPct(n) { return (n*100).toFixed(1) + '%'; }
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+function renderDerived(p, c) {
+  const rows = [
+    ['Total buy-in gross', fmt$(c.grossBuyIn), 'green'],
+    ['Platform revenue', fmt$(c.platformRevenue), 'amber'],
+    ['Net to prize pool', fmt$(c.netToPool_BuyIn), 'green'],
+    ['Grant needed', fmt$(c.grantUSD), 'amber'],
+    ['Total prize pot', fmt$(c.totalPot), 'green'],
+    ['COIN / $1', p.rate + ' COIN', 'coin'],
+    ['Supply value', fmt$(c.totalPot), 'coin'],
+  ];
+  document.getElementById('derived-box').innerHTML = rows.map(([l,v,cls]) =>
+    `<div class="derived-row"><span class="label">${l}</span><span class="value ${cls}">${v}</span></div>`
+  ).join('');
+}
+
+function renderSummaryCards(p, c) {
+  const cards = [
+    { label: 'Total Prize Pool', value: fmt$(c.totalPot), sub: fmtCOIN(p.supply), cls: 'accent-green' },
+    { label: 'Platform Revenue', value: fmt$(c.platformRevenue), sub: p.feeStructure === 'entry' ? 'Entry-only' : 'Per-game', cls: 'accent-amber' },
+    { label: 'Grant Required', value: fmt$(c.grantUSD), sub: fmtCOIN(c.grantCoin), cls: 'accent-blue' },
+    { label: 'RegenHub Total', value: fmt$(c.regenHubRevenue), sub: '10% of infra at full run', cls: 'accent-purple' },
+    { label: 'COIN Supply', value: fmtCOIN(p.supply), sub: fmt$(c.totalPot) + ' at ' + p.rate + ':1', cls: 'accent-coin' },
+    { label: 'Buy-in per Agent', value: fmt$(p.buyIn), sub: p.agents.toLocaleString() + ' agents', cls: '' },
+  ];
+  document.getElementById('summary-cards').innerHTML = cards.map(({label,value,sub,cls}) =>
+    `<div class="card ${cls}"><div class="card-label">${label}</div><div class="card-value">${value}</div><div class="card-sub">${sub}</div></div>`
+  ).join('');
+}
+
+function renderRevenueWaterfall(p, c) {
+  const max = c.grossBuyIn + c.grantUSD;
+  const items = [
+    { label: 'Agent buy-ins (gross)',   value: c.grossBuyIn,       coin: c.coinFromBuyIns, color: '#6c8eff' },
+    { label: 'Platform fee (platform)', value: -c.platformRevenue, coin: null,             color: '#f87171' },
+    { label: 'Buy-ins → prize pool',    value: c.netToPool_BuyIn,  coin: c.netToPool_BuyIn * p.rate, color: '#34d399' },
+    { label: 'Grant contribution',      value: c.grantUSD,         coin: c.grantCoin,      color: '#a78bfa' },
+    { label: 'Total prize pool',        value: c.totalPot,         coin: p.supply,         color: '#f59e0b', bold: true },
+  ];
+  document.getElementById('revenue-waterfall').innerHTML = items.map(({label,value,coin,color,bold}) => {
+    const pct = Math.abs(value) / c.totalPot * 100;
+    const isNeg = value < 0;
+    const disp = isNeg ? fmt$(-value) + ' out' : fmt$(value);
+    const coinStr = coin != null ? ' · ' + fmtCOIN(coin) : '';
+    return `<div class="waterfall-item">
+      <div class="waterfall-label" style="font-weight:${bold?700:400}">${label}</div>
+      <div class="waterfall-bar-wrap">
+        <div class="waterfall-bar" style="width:${Math.min(pct,100)}%;background:${isNeg?'#7f1d1d':color}20;border:1px solid ${isNeg?'#f87171':color}40;color:${isNeg?'#f87171':color}">
+          ${disp}${coinStr}
+        </div>
+      </div>
+      <div class="waterfall-value" style="color:${isNeg?'#f87171':color};font-weight:${bold?700:400}">${disp}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderRegenPnL(p, c) {
+  document.getElementById('regen-pnl').innerHTML = `
+    <table>
+      <thead><tr><th>Category</th><th class="num">Infra Budget</th><th class="num">RegenHub 10%</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Jump Balls</td><td class="num">${fmt$(c.totalJumpBalls)}</td><td class="num" style="color:var(--green)">${fmt$(c.totalJumpBalls*0.1)}</td><td style="color:var(--muted)">March–May coordination</td></tr>
+        <tr><td>Milestone Infra</td><td class="num">${fmt$(c.totalMilestoneInfra)}</td><td class="num" style="color:var(--green)">${fmt$(c.totalMilestoneInfra*0.1)}</td><td style="color:var(--muted)">4 milestones</td></tr>
+        <tr><td>Use Case Budgets</td><td class="num">${fmt$(c.totalUseCaseInfra)}</td><td class="num" style="color:var(--green)">${fmt$(c.totalUseCaseInfra*0.1)}</td><td style="color:var(--muted)">5 use cases</td></tr>
+        <tr class="highlight-row"><td>Total</td><td class="num">${fmt$(c.totalInfra)}</td><td class="num" style="color:var(--green);font-size:16px">${fmt$(c.regenHubRevenue)}</td><td style="color:var(--muted)">at full execution</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:12px;color:var(--muted)">Note: RegenHub takes 10% of infra only — not prizes. Prize pools go 100% to players.</p>
+  `;
+}
+
+function renderMilestone(idx) {
+  const content = document.getElementById('milestone-content');
+  if (idx === 4) {
+    // All milestones
+    let rows = MILESTONES.map(m => `
+      <tr>
+        <td>${m.name}</td>
+        <td>${m.timing}</td>
+        <td class="num">${fmt$(m.infra)}</td>
+        <td class="num">${m.prizes > 0 ? fmt$(m.prizes) : '<span style="color:var(--muted)">—</span>'}</td>
+        <td class="num">${fmt$(m.infra + m.prizes)}</td>
+        <td style="color:var(--muted)">${m.notes}</td>
+      </tr>`).join('');
+    const totalInfra = MILESTONES.reduce((s,m)=>s+m.infra,0);
+    const totalPrizes = MILESTONES.reduce((s,m)=>s+m.prizes,0);
+    content.innerHTML = `
+      <table>
+        <thead><tr><th>Milestone</th><th>Timing</th><th class="num">Infra</th><th class="num">Prizes</th><th class="num">Total</th><th>Notes</th></tr></thead>
+        <tbody>${rows}
+        <tr class="highlight-row">
+          <td colspan="2">Total</td>
+          <td class="num">${fmt$(totalInfra)}</td>
+          <td class="num">${fmt$(totalPrizes)}</td>
+          <td class="num">${fmt$(totalInfra+totalPrizes)}</td>
+          <td></td>
+        </tr></tbody>
+      </table>`;
+    return;
+  }
+  const m = MILESTONES[idx];
+  const p = getParams();
+  const c = calc(p);
+  const isMain = idx === 3;
+  content.innerHTML = `
+    <div class="cards">
+      <div class="card"><div class="card-label">Timing</div><div class="card-value" style="font-size:18px">${m.timing}</div><div class="card-sub">${m.phase === 'rehearsal' ? 'Testnet — no real funds' : 'Live'}</div></div>
+      <div class="card accent-blue"><div class="card-label">Infra Budget</div><div class="card-value">${fmt$(m.infra)}</div><div class="card-sub">RegenHub: ${fmt$(m.infra*0.1)}</div></div>
+      <div class="card ${m.prizes > 0 ? 'accent-green' : ''}"><div class="card-label">Prize Pool</div><div class="card-value">${m.prizes > 0 ? fmt$(m.prizes) : '—'}</div><div class="card-sub">${m.prizes > 0 ? fmtCOIN(m.prizes * p.rate) : 'No prizes this round'}</div></div>
+      ${isMain ? `<div class="card accent-coin"><div class="card-label">Buy-in Revenue</div><div class="card-value">${fmt$(c.grossBuyIn)}</div><div class="card-sub">${p.agents.toLocaleString()} agents × ${fmt$(p.buyIn)}</div></div>` : ''}
+    </div>
+    <div class="section">
+      <h3>Budget Detail</h3>
+      <table>
+        <thead><tr><th>Line Item</th><th class="num">Amount</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Infrastructure</td><td class="num">${fmt$(m.infra)}</td><td style="color:var(--muted)">Platform, hosting, ops</td></tr>
+          <tr><td>Prize Pool</td><td class="num">${m.prizes > 0 ? fmt$(m.prizes) : '—'}</td><td style="color:var(--muted)">${m.notes}</td></tr>
+          <tr><td>RegenHub 10%</td><td class="num" style="color:var(--green)">${fmt$(m.infra*0.1)}</td><td style="color:var(--muted)">Of infra only</td></tr>
+          <tr class="highlight-row"><td>Total</td><td class="num">${fmt$(m.infra + m.prizes)}</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    ${isMain ? `
+    <div class="section">
+      <h3>Main Event Economics (with current parameters)</h3>
+      <table>
+        <thead><tr><th>Flow</th><th class="num">USD</th><th class="num">COIN</th></tr></thead>
+        <tbody>
+          <tr><td>Agent buy-ins</td><td class="num">${fmt$(c.grossBuyIn)}</td><td class="num">${fmtCOIN(c.coinFromBuyIns)}</td></tr>
+          <tr><td>Platform fee (${fmtPct(p.cut)})</td><td class="num" style="color:var(--red)">${fmt$(c.platformRevenue)}</td><td class="num" style="color:var(--muted)">USD, not COIN</td></tr>
+          <tr><td>Net from buy-ins → pool</td><td class="num">${fmt$(c.netToPool_BuyIn)}</td><td class="num">${fmtCOIN(c.netToPool_BuyIn * p.rate)}</td></tr>
+          <tr><td>Grant contribution</td><td class="num">${fmt$(c.grantUSD)}</td><td class="num">${fmtCOIN(c.grantCoin)}</td></tr>
+          <tr class="highlight-row"><td>Total Prize Pool</td><td class="num">${fmt$(c.totalPot)}</td><td class="num">${fmtCOIN(p.supply)}</td></tr>
+        </tbody>
+      </table>
+    </div>` : `<div style="padding:16px;background:var(--surface2);border-radius:8px;color:var(--muted);font-size:13px;">
+      Buy-in economics apply at Main Event. Earlier milestones are funded by grants/infra budget only.
+    </div>`}
+  `;
+}
+
+function renderCoinTab(p, c) {
+  const cards = [
+    { label: 'Total Supply', value: fmtCOIN(p.supply), sub: fmt$(c.totalPot) + ' USD equivalent', cls: 'accent-coin' },
+    { label: 'From Buy-ins', value: fmtCOIN(c.coinFromBuyIns), sub: fmtPct(c.coinFromBuyIns/p.supply) + ' of supply', cls: 'accent-blue' },
+    { label: 'Grant-backed', value: fmtCOIN(c.grantCoin), sub: fmt$(c.grantUSD) + ' grant needed', cls: 'accent-purple' },
+    { label: 'COIN per Agent', value: (c.buyInCoinGross).toLocaleString(), sub: 'gross at entry · COIN', cls: '' },
+  ];
+  document.getElementById('coin-cards').innerHTML = cards.map(({label,value,sub,cls}) =>
+    `<div class="card ${cls}"><div class="card-label">${label}</div><div class="card-value">${value}</div><div class="card-sub">${sub}</div></div>`
+  ).join('');
+
+  const max = p.supply;
+  const items = [
+    { label: 'Buy-in COIN (1,000 agents)', value: c.coinFromBuyIns, color: '#6c8eff' },
+    { label: 'Platform fee portion',        value: c.platformRevenue * p.rate, color: '#f87171' },
+    { label: 'Net agent COIN',             value: c.netToPool_BuyIn * p.rate, color: '#34d399' },
+    { label: 'Grant-backed COIN',           value: c.grantCoin, color: '#a78bfa' },
+  ];
+  document.getElementById('coin-waterfall').innerHTML = items.map(({label,value,color}) => {
+    const pct = value / max * 100;
+    return `<div class="waterfall-item">
+      <div class="waterfall-label">${label}</div>
+      <div class="waterfall-bar-wrap">
+        <div class="waterfall-bar" style="width:${Math.min(pct,100)}%;background:${color}20;border:1px solid ${color}40;color:${color}">
+          ${fmtCOIN(value)}
+        </div>
+      </div>
+      <div class="waterfall-value" style="color:${color}">${fmtPct(value/max)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('coin-detail').innerHTML = `
+    <table>
+      <thead><tr><th>Parameter</th><th class="num">Value</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Conversion rate</td><td class="num">${p.rate} COIN / $1</td><td style="color:var(--muted)">Fixed rate, set by supply and pot size</td></tr>
+        <tr><td>Total supply</td><td class="num">${fmtCOIN(p.supply)}</td><td style="color:var(--muted)">Equals total prize pot in COIN</td></tr>
+        <tr><td>Total pot (USD)</td><td class="num">${fmt$(c.totalPot)}</td><td style="color:var(--muted)">Supply ÷ rate</td></tr>
+        <tr><td>COIN from 1,000 buy-ins</td><td class="num">${fmtCOIN(c.coinFromBuyIns)}</td><td style="color:var(--muted)">${fmtPct(c.coinFromBuyIns/p.supply)} of total supply</td></tr>
+        <tr><td>Grant to fill pot</td><td class="num">${fmt$(c.grantUSD)}</td><td style="color:var(--muted)">Total pot minus buy-in gross</td></tr>
+        <tr><td>NFT prizes</td><td class="num">10 (TBD)</td><td style="color:var(--muted)">Value not yet set</td></tr>
+      </tbody>
+    </table>
+  `;
+}
+
+function renderSensitivity(p, c) {
+  const agentCounts = [100, 250, 500, 1000, 2000, 5000];
+
+  function rowFor(agents, fee) {
+    const pp = {...p, agents, feeStructure: fee};
+    const cc = calc(pp);
+    return `<tr ${agents===p.agents?'class="highlight-row"':''}>
+      <td>${agents.toLocaleString()}</td>
+      <td class="num">${fmt$(cc.grossBuyIn * (fee==='per-game'?pp.games:1))}</td>
+      <td class="num" style="color:var(--amber)">${fmt$(cc.platformRevenue * (fee==='per-game'?pp.games:1))}</td>
+      <td class="num">${fmt$(cc.grantUSD)}</td>
+    </tr>`;
+  }
+
+  const entryRows = agentCounts.map(a => rowFor(a, 'entry')).join('');
+  const gameRows = agentCounts.map(a => rowFor(a, 'per-game')).join('');
+
+  document.getElementById('sens-tables').innerHTML = `
+    <div class="sens-table-wrap">
+      <h4>Entry-Only Fee</h4>
+      <table>
+        <thead><tr><th>Agents</th><th class="num">Buy-in Rev</th><th class="num">Platform $</th><th class="num">Grant Needed</th></tr></thead>
+        <tbody>${entryRows}</tbody>
+      </table>
+    </div>
+    <div class="sens-table-wrap">
+      <h4>Per-Game Fee (${p.games} games)</h4>
+      <table>
+        <thead><tr><th>Agents</th><th class="num">Buy-in Rev</th><th class="num">Platform $</th><th class="num">Grant Needed</th></tr></thead>
+        <tbody>${gameRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  const cuts = [5, 10, 15, 20, 25, 30];
+  const cutRows = cuts.map(cut => {
+    const pp = {...p, cut: cut/100};
+    const cc = calc(pp);
+    const pgRevenue = cc.grossBuyIn * p.games * (cut/100);
+    return `<tr ${cut===(p.cut*100)?'class="highlight-row"':''}>
+      <td>${cut}%</td>
+      <td class="num">${fmt$(cc.platformRevenue)}</td>
+      <td class="num">${fmt$(pgRevenue)}</td>
+      <td class="num" style="color:var(--accent2)">${fmt$(pgRevenue - cc.platformRevenue)} more per-game</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('fee-comparison').innerHTML = `
+    <table>
+      <thead><tr><th>Platform Cut</th><th class="num">Entry-Only Rev</th><th class="num">Per-Game Rev</th><th class="num">Difference</th></tr></thead>
+      <tbody>${cutRows}</tbody>
+    </table>
+    <p style="margin-top:12px;font-size:12px;color:var(--muted)">At 1,000 agents × $5 buy-in × ${p.games} games. Highlighted row = current parameters.</p>
+  `;
+}
+
+function renderUseCases(p, c) {
+  const rows = USE_CASES.map(u => `
+    <tr>
+      <td>${u.name}</td>
+      <td><span class="badge badge-blue">${u.category}</span></td>
+      <td class="num">${fmt$(u.infra)}</td>
+      <td class="num">${u.prizes > 0 ? fmt$(u.prizes) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td class="num">${fmt$(u.infra + u.prizes)}</td>
+      <td style="color:var(--muted)">${u.lead || '—'}</td>
+    </tr>`).join('');
+  const ti = USE_CASES.reduce((s,u)=>s+u.infra,0);
+  const tp = USE_CASES.reduce((s,u)=>s+u.prizes,0);
+  document.getElementById('usecase-content').innerHTML = `
+    <div class="cards" style="margin-bottom:20px">
+      <div class="card accent-blue"><div class="card-label">Total Use Case Infra</div><div class="card-value">${fmt$(ti)}</div><div class="card-sub">RegenHub: ${fmt$(ti*0.1)}</div></div>
+      <div class="card accent-green"><div class="card-label">Use Case Prizes</div><div class="card-value">${fmt$(tp)}</div><div class="card-sub">Esports only</div></div>
+      <div class="card"><div class="card-label">Use Cases Defined</div><div class="card-value">${USE_CASES.length}</div><div class="card-sub">Each $3K infra</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Use Case</th><th>Category</th><th class="num">Infra</th><th class="num">Prizes</th><th class="num">Total</th><th>Lead</th></tr></thead>
+      <tbody>${rows}
+      <tr class="highlight-row">
+        <td colspan="2">Total</td>
+        <td class="num">${fmt$(ti)}</td>
+        <td class="num">${fmt$(tp)}</td>
+        <td class="num">${fmt$(ti+tp)}</td>
+        <td></td>
+      </tr></tbody>
+    </table>
+  `;
+}
+
+function renderQuestions() {
+  document.getElementById('questions-content').innerHTML = OPEN_QUESTIONS.map((q, i) => `
+    <div class="open-q">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <strong>${i+1}. ${q.q}</strong>
+        <span class="badge ${q.impact.startsWith('High') ? 'badge-amber' : 'badge-muted'}">${q.impact}</span>
+      </div>
+      <div style="color:var(--muted)">${q.detail}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// UI HANDLERS
+// ============================================================
+function setFee(type) {
+  feeStructure = type;
+  document.getElementById('fee-entry').classList.toggle('active', type === 'entry');
+  document.getElementById('fee-game').classList.toggle('active', type === 'per-game');
+  document.getElementById('fee-desc').textContent = type === 'entry'
+    ? 'Fee collected once at buy-in. Simpler for players, lower platform revenue.'
+    : 'Fee collected at each game re-entry. ~' + getParams().games + '× platform revenue vs entry-only.';
+  render();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function showMilestone(idx) {
+  currentMilestone = idx;
+  document.querySelectorAll('.milestone-tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+  renderMilestone(idx);
+}
+
+function render() {
+  const p = getParams();
+  const c = calc(p);
+  renderDerived(p, c);
+  renderSummaryCards(p, c);
+  renderRevenueWaterfall(p, c);
+  renderRegenPnL(p, c);
+  renderMilestone(currentMilestone);
+  renderCoinTab(p, c);
+  renderSensitivity(p, c);
+  renderUseCases(p, c);
+  renderQuestions();
+}
+
+// Bind inputs
+['p-agents','p-games','p-buyin','p-cut','p-supply','p-rate'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+
+// Initial render
+render();
+</script>
+</body>
+</html>
